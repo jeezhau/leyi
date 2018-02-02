@@ -8,16 +8,16 @@
   <name>leyi Maven Webapp</name>
   <url>http://maven.apache.org</url>
   <properties>
-  	<spring-version>4.2.5.RELEASE</spring-version>
-  	<mybatis.version>3.2.6</mybatis.version> 
-	<aspectj.version>1.8.8</aspectj.version>
-	<jackson.version>2.7.4</jackson.version>
+  	<spring-version>5.0.0.RELEASE</spring-version>
+  	<mybatis.version>3.4.5</mybatis.version> 
+	<aspectj.version>1.8.13</aspectj.version>
+	<jackson.version>2.9.4</jackson.version>
   </properties>
   <dependencies>
     <dependency>
 		<groupId>junit</groupId>
 		<artifactId>junit</artifactId>
-		<version>4.11</version>
+		<version>4.12</version>
 		<scope>test</scope>
     </dependency>
     
@@ -52,23 +52,117 @@
 		<artifactId>spring-aop</artifactId>
 		<version>${spring-version}</version>
 	</dependency>
-    <dependency>  
-		<groupId>aopalliance</groupId>  
-    	<artifactId>aopalliance</artifactId>  
-     	<version>1.0</version>  
-    </dependency>   
-	<dependency>  
-	    <groupId>org.aspectj</groupId>
-	    <artifactId>aspectjrt</artifactId>  
-	    <version>${aspectj.version}</version>  
-	</dependency>  
-	<dependency>  
-	    <groupId>org.aspectj</groupId>  
-	    <artifactId>aspectjweaver</artifactId>  
-	    <version>${aspectj.version}</version>  
-	    <scope>runtime</scope>  
+	<!-- ======================================
+		连接数据库 
+		导入Mysql数据库链接jar包
+	=======================================-->	
+	<dependency> 
+		<groupId>mysql</groupId>  
+		<artifactId>mysql-connector-java</artifactId> 
+		<version>8.0.8-dmr</version>  
+	</dependency>
+	<!-- ======================================
+		数据源与连接池 
+	=======================================-->
+	<!-- 导入dbcp的jar包，用来在applicationContext.xml中配置数据库 -->   
+	<dependency>
+	    <groupId>org.apache.commons</groupId>
+	    <artifactId>commons-dbcp2</artifactId>
+	    <version>2.2.0</version>
+	</dependency>
+	<!-- ======================================
+		ORM映射模块 
+		使用 mybatis
+	=======================================-->	
+	<!-- mybatis核心包 --> 
+	<dependency> 
+		<groupId>org.mybatis</groupId> 
+		<artifactId>mybatis</artifactId> 
+		<version>${mybatis.version}</version>  
+	</dependency>   
+	<dependency>
+		<groupId>org.mybatis</groupId> 
+		<artifactId>mybatis-spring</artifactId>    
+		<version>1.3.1</version> 
 	</dependency> 
-    <!-- JSTL -->
+	
+	<!-- ======================================
+		日志框架：slf4j+logback 
+		=======================================-->
+	<dependency>
+	    <groupId>ch.qos.logback</groupId>
+	    <artifactId>logback-classic</artifactId>
+	    <version>1.2.3</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.logback-extensions</groupId>
+	    <artifactId>logback-ext-spring</artifactId>
+	    <version>0.1.4</version>
+	</dependency> 
+	<dependency>
+	    <groupId>org.slf4j</groupId>
+	    <artifactId>jcl-over-slf4j</artifactId>
+	    <version>1.7.25</version>
+	</dependency>
+	
+	<!-- ======================================
+		加解密模块 
+	=======================================-->
+	<dependency>
+	    <groupId>commons-codec</groupId>
+	    <artifactId>commons-codec</artifactId>
+	    <version>1.11</version>
+	</dependency>
+	
+	<!-- ======================================
+		邮件处理
+	=======================================-->	
+	<dependency>
+	    <groupId>javax.mail</groupId>
+	    <artifactId>javax.mail-api</artifactId>
+	    <version>1.6.0</version>
+	</dependency>
+	<!-- ======================================
+		数据校验框架
+	=======================================-->	
+	<dependency>
+	    <groupId>org.hibernate</groupId>
+	    <artifactId>hibernate-validator</artifactId>
+	    <version>6.0.7.Final</version>
+	</dependency>
+	
+	<!-- ======================================
+		json 数据处理
+		使用 jackson
+	=======================================-->	
+	<dependency>
+	    	<groupId>com.fasterxml.jackson.core</groupId>
+	    	<artifactId>jackson-databind</artifactId>
+	    	<version>${jackson.version}</version>
+	</dependency>
+	<dependency>
+	    	<groupId>com.fasterxml.jackson.core</groupId>
+	    	<artifactId>jackson-core</artifactId>
+	    	<version>${jackson.version}</version>
+	</dependency>
+	<dependency>
+	    	<groupId>com.fasterxml.jackson.core</groupId>
+	    	<artifactId>jackson-annotations</artifactId>
+	    	<version>${jackson.version}</version>
+	</dependency>
+	
+	<!-- ======================================
+		文件上传处理
+	=======================================-->	
+	<dependency>
+		<groupId>commons-fileupload</groupId>
+		<artifactId>commons-fileupload</artifactId>
+		<version>1.3.1</version>
+	</dependency> 
+	
+	<!-- ======================================
+		JSP标准标签库(JSTL)
+	=======================================-->	
     <dependency>
 	   	<groupId>javax.servlet.jsp.jstl</groupId>
 	       <artifactId>jstl-api</artifactId>
@@ -104,104 +198,16 @@
 		</exclusions>
 	</dependency>
 	
-	<!-- mybatis核心包 --> 
-	<dependency> 
-		<groupId>org.mybatis</groupId> 
-		<artifactId>mybatis</artifactId> 
-		<version>${mybatis.version}</version>  
-	</dependency>   
-	<dependency>
-		<groupId>org.mybatis</groupId> 
-		<artifactId>mybatis-spring</artifactId>    
-		<version>1.2.2</version> 
-	</dependency> 
-
-	<!-- 导入Mysql数据库链接jar包--> 
-	<dependency> 
-		<groupId>mysql</groupId>  
-		<artifactId>mysql-connector-java</artifactId> 
-		<version>5.1.30</version>  
-	</dependency> 
-	<!-- 导入dbcp的jar包，用来在applicationContext.xml中配置数据库 -->   
-	<dependency>   
-		<groupId>commons-dbcp</groupId> 
-		<artifactId>commons-dbcp</artifactId>    
-		<version>1.2.2</version> 
-	</dependency>
-	
-	<dependency>
-		<groupId>commons-fileupload</groupId>
-		<artifactId>commons-fileupload</artifactId>
-		<version>1.3.1</version>
-	</dependency>
-	<!-- jackson -->
-	<dependency>
-    	<groupId>com.fasterxml.jackson.core</groupId>
-    	<artifactId>jackson-databind</artifactId>
-    	<version>${jackson.version}</version>
-	</dependency>
-	<dependency>
-    	<groupId>com.fasterxml.jackson.core</groupId>
-    	<artifactId>jackson-core</artifactId>
-    	<version>${jackson.version}</version>
-	</dependency>
-	<dependency>
-    	<groupId>com.fasterxml.jackson.core</groupId>
-    	<artifactId>jackson-annotations</artifactId>
-    	<version>${jackson.version}</version>
-	</dependency>
-	<!-- https://mvnrepository.com/artifact/commons-codec/commons-codec -->
-	<dependency>
-	    <groupId>commons-codec</groupId>
-	    <artifactId>commons-codec</artifactId>
-	    <version>1.10</version>
-	</dependency>
-	<!-- 日志框架：slf4j+logback -->
-	<!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
-	<dependency>
-	    <groupId>ch.qos.logback</groupId>
-	    <artifactId>logback-classic</artifactId>
-	    <version>1.1.7</version>
-	</dependency>
-	<!-- https://mvnrepository.com/artifact/org.logback-extensions/logback-ext-spring -->
-	<dependency>
-	    <groupId>org.logback-extensions</groupId>
-	    <artifactId>logback-ext-spring</artifactId>
-	    <version>0.1.4</version>
-	</dependency> 
-	<!-- https://mvnrepository.com/artifact/org.slf4j/jcl-over-slf4j -->
-	<dependency>
-	    <groupId>org.slf4j</groupId>
-	    <artifactId>jcl-over-slf4j</artifactId>
-	    <version>1.7.21</version>
-	</dependency>
-	<!-- 数据校验框架
-	https://mvnrepository.com/artifact/org.hibernate/hibernate-validator 
-	-->
-	<dependency>
-	    <groupId>org.hibernate</groupId>
-	    <artifactId>hibernate-validator</artifactId>
-	    <version>5.2.4.Final</version>
-	</dependency>
-	<!-- https://mvnrepository.com/artifact/javax.mail/mail -->
-	<dependency>
-	    <groupId>javax.mail</groupId>
-	    <artifactId>mail</artifactId>
-	    <version>1.4.7</version>
-	</dependency>
+	<!-- ======================================
+		freemarker
+	=======================================-->
 	<!-- https://mvnrepository.com/artifact/org.freemarker/freemarker -->
 	<dependency>
 	    <groupId>org.freemarker</groupId>
 	    <artifactId>freemarker</artifactId>
 	    <version>2.3.23</version>
 	</dependency>
-	<!-- https://mvnrepository.com/artifact/org.xhtmlrenderer/flying-saucer-pdf-itext5 -->
-	<dependency>
-	    <groupId>org.xhtmlrenderer</groupId>
-	    <artifactId>flying-saucer-pdf-itext5</artifactId>
-	    <version>9.0.8</version>
-	</dependency>
-	
+
 	
   </dependencies>
   
@@ -209,15 +215,15 @@
   <build>
     <finalName>leyi</finalName>
     <plugins>
-    	<plugin>
-    		<groupId>org.apache.maven.plugins</groupId>
-    		<artifactId>maven-compiler-plugin</artifactId>
-    		<version>3.1</version>
-    		<configuration>
-    			<source>1.8</source>
-    			<target>1.8</target>
-    		</configuration>
-    	</plugin>
+	    	<plugin>
+	    		<groupId>org.apache.maven.plugins</groupId>
+	    		<artifactId>maven-compiler-plugin</artifactId>
+	    		<version>3.3</version>
+	    		<configuration>
+	    			<source>1.8</source>
+	    			<target>1.8</target>
+	    		</configuration>
+	    	</plugin>
     </plugins>
   </build>
 </project>
