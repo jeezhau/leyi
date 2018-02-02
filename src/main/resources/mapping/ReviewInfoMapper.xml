@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="me.jeekhan.leyi.dao.ReviewInfoMapper" >
+  <resultMap id="BaseResultMap" type="me.jeekhan.leyi.model.ReviewInfo" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="obj_name" property="objName" jdbcType="VARCHAR" />
+    <result column="key_id" property="keyId" jdbcType="INTEGER" />
+    <result column="review_info" property="reviewInfo" jdbcType="VARCHAR" />
+    <result column="review_opr" property="reviewOpr" jdbcType="INTEGER" />
+    <result column="review_time" property="reviewTime" jdbcType="TIMESTAMP" />
+    <result column="result" property="result" jdbcType="CHAR" />
+  </resultMap>
+  <resultMap id="ResultMapWithBLOBs" type="me.jeekhan.leyi.model.ReviewInfo" extends="BaseResultMap" >
+    <result column="original_info" property="originalInfo" jdbcType="LONGVARCHAR" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    id, obj_name, key_id, review_info, review_opr, review_time, result
+  </sql>
+  <sql id="Blob_Column_List" >
+    original_info
+  </sql>
+  <select id="selectByExampleWithBLOBs" resultMap="ResultMapWithBLOBs" parameterType="me.jeekhan.leyi.model.ReviewInfoExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from tb_review_info
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="me.jeekhan.leyi.model.ReviewInfoExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from tb_review_info
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from tb_review_info
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from tb_review_info
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <delete id="deleteByExample" parameterType="me.jeekhan.leyi.model.ReviewInfoExample" >
+    delete from tb_review_info
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="me.jeekhan.leyi.model.ReviewInfo" >
+    insert into tb_review_info (id, obj_name, key_id, 
+      review_info, review_opr, review_time, 
+      result, original_info)
+    values (#{id,jdbcType=INTEGER}, #{objName,jdbcType=VARCHAR}, #{keyId,jdbcType=INTEGER}, 
+      #{reviewInfo,jdbcType=VARCHAR}, #{reviewOpr,jdbcType=INTEGER}, #{reviewTime,jdbcType=TIMESTAMP}, 
+      #{result,jdbcType=CHAR}, #{originalInfo,jdbcType=LONGVARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="me.jeekhan.leyi.model.ReviewInfo" >
+    insert into tb_review_info
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="objName != null" >
+        obj_name,
+      </if>
+      <if test="keyId != null" >
+        key_id,
+      </if>
+      <if test="reviewInfo != null" >
+        review_info,
+      </if>
+      <if test="reviewOpr != null" >
+        review_opr,
+      </if>
+      <if test="reviewTime != null" >
+        review_time,
+      </if>
+      <if test="result != null" >
+        result,
+      </if>
+      <if test="originalInfo != null" >
+        original_info,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="objName != null" >
+        #{objName,jdbcType=VARCHAR},
+      </if>
+      <if test="keyId != null" >
+        #{keyId,jdbcType=INTEGER},
+      </if>
+      <if test="reviewInfo != null" >
+        #{reviewInfo,jdbcType=VARCHAR},
+      </if>
+      <if test="reviewOpr != null" >
+        #{reviewOpr,jdbcType=INTEGER},
+      </if>
+      <if test="reviewTime != null" >
+        #{reviewTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="result != null" >
+        #{result,jdbcType=CHAR},
+      </if>
+      <if test="originalInfo != null" >
+        #{originalInfo,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="me.jeekhan.leyi.model.ReviewInfoExample" resultType="java.lang.Integer" >
+    select count(*) from tb_review_info
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update tb_review_info
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=INTEGER},
+      </if>
+      <if test="record.objName != null" >
+        obj_name = #{record.objName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.keyId != null" >
+        key_id = #{record.keyId,jdbcType=INTEGER},
+      </if>
+      <if test="record.reviewInfo != null" >
+        review_info = #{record.reviewInfo,jdbcType=VARCHAR},
+      </if>
+      <if test="record.reviewOpr != null" >
+        review_opr = #{record.reviewOpr,jdbcType=INTEGER},
+      </if>
+      <if test="record.reviewTime != null" >
+        review_time = #{record.reviewTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.result != null" >
+        result = #{record.result,jdbcType=CHAR},
+      </if>
+      <if test="record.originalInfo != null" >
+        original_info = #{record.originalInfo,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExampleWithBLOBs" parameterType="map" >
+    update tb_review_info
+    set id = #{record.id,jdbcType=INTEGER},
+      obj_name = #{record.objName,jdbcType=VARCHAR},
+      key_id = #{record.keyId,jdbcType=INTEGER},
+      review_info = #{record.reviewInfo,jdbcType=VARCHAR},
+      review_opr = #{record.reviewOpr,jdbcType=INTEGER},
+      review_time = #{record.reviewTime,jdbcType=TIMESTAMP},
+      result = #{record.result,jdbcType=CHAR},
+      original_info = #{record.originalInfo,jdbcType=LONGVARCHAR}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update tb_review_info
+    set id = #{record.id,jdbcType=INTEGER},
+      obj_name = #{record.objName,jdbcType=VARCHAR},
+      key_id = #{record.keyId,jdbcType=INTEGER},
+      review_info = #{record.reviewInfo,jdbcType=VARCHAR},
+      review_opr = #{record.reviewOpr,jdbcType=INTEGER},
+      review_time = #{record.reviewTime,jdbcType=TIMESTAMP},
+      result = #{record.result,jdbcType=CHAR}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="me.jeekhan.leyi.model.ReviewInfo" >
+    update tb_review_info
+    <set >
+      <if test="objName != null" >
+        obj_name = #{objName,jdbcType=VARCHAR},
+      </if>
+      <if test="keyId != null" >
+        key_id = #{keyId,jdbcType=INTEGER},
+      </if>
+      <if test="reviewInfo != null" >
+        review_info = #{reviewInfo,jdbcType=VARCHAR},
+      </if>
+      <if test="reviewOpr != null" >
+        review_opr = #{reviewOpr,jdbcType=INTEGER},
+      </if>
+      <if test="reviewTime != null" >
+        review_time = #{reviewTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="result != null" >
+        result = #{result,jdbcType=CHAR},
+      </if>
+      <if test="originalInfo != null" >
+        original_info = #{originalInfo,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="me.jeekhan.leyi.model.ReviewInfo" >
+    update tb_review_info
+    set obj_name = #{objName,jdbcType=VARCHAR},
+      key_id = #{keyId,jdbcType=INTEGER},
+      review_info = #{reviewInfo,jdbcType=VARCHAR},
+      review_opr = #{reviewOpr,jdbcType=INTEGER},
+      review_time = #{reviewTime,jdbcType=TIMESTAMP},
+      result = #{result,jdbcType=CHAR},
+      original_info = #{originalInfo,jdbcType=LONGVARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="me.jeekhan.leyi.model.ReviewInfo" >
+    update tb_review_info
+    set obj_name = #{objName,jdbcType=VARCHAR},
+      key_id = #{keyId,jdbcType=INTEGER},
+      review_info = #{reviewInfo,jdbcType=VARCHAR},
+      review_opr = #{reviewOpr,jdbcType=INTEGER},
+      review_time = #{reviewTime,jdbcType=TIMESTAMP},
+      result = #{result,jdbcType=CHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="me.jeekhan.leyi.dao.ArticleBriefMapper" >
+  <resultMap id="BaseResultMap" type="me.jeekhan.leyi.model.ArticleBrief" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="keywords" property="keywords" jdbcType="VARCHAR" />
+    <result column="brief" property="brief" jdbcType="VARCHAR" />
+    <result column="source" property="source" jdbcType="CHAR" />
+    <result column="theme_id" property="themeId" jdbcType="INTEGER" />
+    <result column="type" property="type" jdbcType="CHAR" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="update_opr" property="updateOpr" jdbcType="INTEGER" />
+    <result column="enabled" property="enabled" jdbcType="CHAR" />
+  </resultMap>
+  
+  <sql id="Base_Column_List" >
+    id, name, keywords, brief, source, theme_id, type, update_time, update_opr, enabled
+  </sql>
+  
+  <!-- 根据主键取文章简介-->
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from tb_article_brief
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  
+  <!--根据主键更新文章 状态：0-正常，1-待审核，D-删除，R-拒绝-->
+  <delete id="updateEnabledStatus" parameterType="map" >
+    update tb_article_brief 
+    set enabled = #{enabled,jdbcType=CHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  
+  <!-- 新插入一条文章简介-->
+  <insert id="insert" parameterType="me.jeekhan.leyi.model.ArticleBrief" >
+    insert into tb_article_brief (id, name, keywords, 
+      brief, source, theme_id, 
+      type, update_time, update_opr, 
+      enabled)
+    values (#{id,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR}, #{keywords,jdbcType=VARCHAR}, 
+      #{brief,jdbcType=VARCHAR}, #{source,jdbcType=CHAR}, #{themeId,jdbcType=INTEGER}, 
+      #{type,jdbcType=CHAR}, #{updateTime,jdbcType=TIMESTAMP}, #{updateOpr,jdbcType=INTEGER}, 
+      #{enabled,jdbcType=CHAR})
+  </insert>
+  
+  <!--根据主键更新全部文章简介信息-->
+  <update id="updateByPrimaryKey" parameterType="me.jeekhan.leyi.model.ArticleBrief" >
+    update tb_article_brief
+    set name = #{name,jdbcType=VARCHAR},
+      keywords = #{keywords,jdbcType=VARCHAR},
+      brief = #{brief,jdbcType=VARCHAR},
+      source = #{source,jdbcType=CHAR},
+      theme_id = #{themeId,jdbcType=INTEGER},
+      type = #{type,jdbcType=CHAR},
+      update_time = #{updateTime,jdbcType=TIMESTAMP},
+      update_opr = #{updateOpr,jdbcType=INTEGER},
+      enabled = #{enabled,jdbcType=CHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  <!--取指定用户的所有（分页）的文章 -->
+  <select id="selectArticlesByUser" parameterType="map" resultMap="BaseResultMap">
+  	select 
+  	<include refid="Base_Column_List"/>
+  	from tb_article_brief b
+  	where b.enabled in ('0'<if test="isSelf" >,'1','R'</if>)
+  	 and update_opr = #{userId}
+  	order by (UNIX_TIMESTAMP(b.update_time)/3600/24 + (select count(1) from tb_comments c where c.article_id = b.id and c.enabled=0)) desc
+  	limit #{pageCond.begin},#{pageCond.pageSize}
+  </select>
+  
+  <!--取指定用户的所有的文章数量 -->
+  <select id="countArticlesByUser" parameterType="map" resultType="java.lang.Integer" >
+  	select count(1) CNT
+  	from tb_article_brief b
+  	where b.enabled in ('0'<if test="isSelf" >,'1','R'</if>)
+  	 and update_opr = #{userId}
+  </select>
+  
+  <!--取指定主题下的所有文章简介 -->
+  <select id="selectArticlesByTheme" parameterType="map" resultMap="BaseResultMap">
+  	select 
+  	<include refid="Base_Column_List"/>
+  	from tb_article_brief b
+  	where b.enabled in ('0'<if test="isSelf" >,'1','R'</if>)
+  	and b.theme_id in (select t1.id from tb_theme_class t1 where t1.logic_id like CONCAT(#{logicId},'%')) 
+  	order by (UNIX_TIMESTAMP(b.update_time)/3600/24 + (select count(1) from tb_comments c where c.article_id = b.id and c.enabled=0)) desc
+  	limit #{pageCond.begin},#{pageCond.pageSize}
+  </select> 
+  
+    <!--取指定主题下的所有文章简介数量 -->
+  <select id="countArticlesByTheme" parameterType="map" resultType="java.lang.Integer">
+  	select count(1) CNT
+  	from tb_article_brief b
+  	where b.enabled in ('0'<if test="isSelf" >,'1','R'</if>)
+  	and b.theme_id in (select t1.id from tb_theme_class t1 where t1.logic_id like CONCAT(#{logicId},'%')) 
+  </select>
+  
+  <!-- 取所有用户文章 -->
+  <select id="selectArticles" parameterType="map" resultMap="BaseResultMap">
+  	select 
+  	<include refid="Base_Column_List"/>
+  	from tb_article_brief b
+  	where b.enabled in ('0'<if test="isSelf" >,'1','R'</if>)
+  	order by (UNIX_TIMESTAMP(b.update_time)/3600/24 + (select count(1) from tb_comments c where c.article_id = b.id and c.enabled=0)) desc
+  	limit #{pageCond.begin},#{pageCond.pageSize}
+  </select>
+  
+  <!--取指定主题下指定名称最新添加的文章简介 -->
+  <select id="selectLatestRecrod" parameterType="me.jeekhan.leyi.model.ArticleBrief"  resultMap="BaseResultMap">
+  	select 
+  	<include refid="Base_Column_List"/>
+  	from tb_article_brief 
+  	where id = ( select max(id) from tb_article_brief b 
+		where b.theme_id = #{themeId} and b.`name` = #{name} and b.keywords = #{keywords} and b.source=#{source} and b.type=#{type} and b.update_opr=#{updateOpr})
+  </select> 
+  
+  <!-- 取待审核的最新10条文章简介 -->
+  <select id="selectArticles4Review" parameterType="map" resultMap="BaseResultMap">
+  	select 
+  	<include refid="Base_Column_List"/>
+  	from tb_article_brief b
+  	where b.enabled = '1'
+  	order by b.update_time desc
+  	limit 0,10
+  </select>
+  
+  <!-- 统计待审核文章数量-->
+  <select id="countArticles4Review" resultType="java.lang.Integer" >
+  	select count(1) CNT 
+  	from tb_article_brief t 
+  	where t.enabled = '1' 
+  </select>	 
+</mapper>
+

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:task="http://www.springframework.org/schema/task" 
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context 
+		http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/mvc 
+		http://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://www.springframework.org/schema/tx 
+		http://www.springframework.org/schema/tx/spring-tx.xsd
+		http://www.springframework.org/schema/aop 
+		http://www.springframework.org/schema/aop/spring-aop.xsd
+		http://www.springframework.org/schema/task 
+		http://www.springframework.org/schema/task/spring-task.xsd">
+	
+
+	<!-- 自动扫描-->  
+	<context:component-scan base-package="me.jeekhan.leyi" use-default-filters="true">
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+		<context:exclude-filter type="annotation" expression="org.springframework.web.bind.annotation.ControllerAdvice"/>
+	</context:component-scan>
+
+	<!-- 引入配置文件 -->  
+    <bean id="propertyConfigurer" class="me.jeekhan.leyi.common.EncryptPropertyConfigurer" p:location="classpath:/jdbc.properties"></bean>
+	
+	<!--数据源配置-->
+	<bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">  
+		<property name="driverClassName"  value="${jdbc.driver}" /> 
+		<property name="url" value="${jdbc.url}" />  
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+		<property name="initialSize"  value="${jdbc.initialSize}"></property> 
+		<property name="maxIdle"  value="${jdbc.maxIdle}"></property> 
+		<property name="minIdle"  value="${jdbc.minIdle}"></property> 
+	</bean>  
+	<!-- spring和MyBatis整合--> 
+	<bean id="sqlSessionFactory"  class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<!-- 自动扫描mapping.xml文件 --> 
+		<property name="mapperLocations"  value="classpath:mapping/*.xml"></property>
+		<!--mybatis配置
+		<property name="configLocation" value="classpath:MyBatis-Configuration.xml"></property> -->
+	</bean>  
+
+	<!-- DAO组件注册--> 
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage"  value="me.jeekhan.leyi.dao" /> 
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"></property> 
+	</bean>  
+
+	<!-- 事务管理 --> 
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager"> 
+		<property name="dataSource" ref="dataSource" />
+	</bean>  
+	<!-- <tx:annotation-driven/> only looks for @Transactional on beans in the same application context it is defined in. 
+	 This means that, if you put <tx:annotation-driven/> in a WebApplicationContext for a DispatcherServlet, 
+	 it only checks for @Transactional beans in your controllers, and not your services-->
+	<tx:annotation-driven transaction-manager="transactionManager" />
+	
+	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+      <property name="basename" value="validMsg" />
+      <property name="useCodeAsDefaultMessage" value="true" />
+	</bean>
+	
+<!-- 	 定时任务注解驱动
+	<task:annotation-driven scheduler="myScheduler"/> 
+	<task:scheduler id="myScheduler" pool-size="5"/> 
+ -->
+
+</beans>
+
+

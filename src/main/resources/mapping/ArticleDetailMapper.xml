@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="me.jeekhan.leyi.dao.ArticleDetailMapper" >
+	
+  <resultMap id="BaseResultMap" type="me.jeekhan.leyi.model.ArticleDetail" >
+    <id column="article_id" property="articleId" jdbcType="Long" />
+  </resultMap>
+  
+  <resultMap id="ResultMapWithBLOBs" type="me.jeekhan.leyi.model.ArticleDetail" extends="BaseResultMap" >
+    <result column="content" property="content" jdbcType="LONGVARCHAR" />
+  </resultMap>
+  
+  <sql id="Base_Column_List" >
+    article_id
+  </sql>
+  <sql id="Blob_Column_List" >
+    content
+  </sql>
+
+
+  <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from tb_article_content
+    where article_id = #{articleId,jdbcType=Long}
+  </select>
+  
+  <delete id="delete" parameterType="java.lang.Long" >
+    delete from tb_article_content
+    where article_id = #{articleId,jdbcType=Long}
+  </delete>
+
+  <insert id="insert" parameterType="me.jeekhan.leyi.model.ArticleContent" >
+    insert into tb_article_content (article_id, content)
+    values (#{articleId,jdbcType=Long}, #{content,jdbcType=LONGVARCHAR})
+  </insert>
+ 
+  <update id="update" parameterType="me.jeekhan.leyi.model.ArticleContent" >
+    update tb_article_content 
+    set content = #{content,jdbcType=LONGVARCHAR}
+    where article_id = #{articleId,jdbcType=Long}
+  </update>
+
+
+</mapper>
+
