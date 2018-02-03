@@ -1,5 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="me.jeekhan.leyi.model.ThemeInfo,java.util.*,me.jeekhan.leyi.common.*"%>
+<%@ page import="java.util.*,me.jeekhan.leyi.common.*"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
 <%@ taglib tagdir="/WEB-INF/tags" prefix="jk"%>
@@ -10,20 +10,20 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">  
-  <title>注册</title>
+  <title>欢迎-注册</title>
   <meta name="description" content="">
   <meta name="author" content="jeekhan">
-  <link rel="shortcut icon" href="/leyi/images/leyi.ico" type="image/x-icon" />
-  <link rel="stylesheet" href="/leyi/bootstrap-3.3.5/css/bootstrap.min.css">  
-  <link rel="stylesheet" href="/leyi/bootstrap-3.3.5/css/fileinput.min.css">  
+  <link rel="shortcut icon" href="${contextPath}/images${contextPath}.ico" type="image/x-icon" />
+  <link rel="stylesheet" href="${contextPath}/bootstrap-3.3.5/css/bootstrap.min.css">  
+  <link rel="stylesheet" href="${contextPath}/bootstrap-3.3.5/css/fileinput.min.css">  
   <script src="http://apps.bdimg.com/libs/jquery/2.1.1/jquery.min.js"></script>
 
-  <script src="/leyi/bootstrap-3.3.5/js/fileinput.min.js"></script>
-  <script src="/leyi/bootstrap-3.3.5/js/zh.js"></script>
+  <script src="${contextPath}/bootstrap-3.3.5/js/fileinput.min.js"></script>
+  <script src="${contextPath}/bootstrap-3.3.5/js/zh.js"></script>
   
-    <script src="/leyi/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+  <script src="${contextPath}/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 
-  <script src="/leyi/ckeditor/ckeditor.js"></script>
+  <script src="${contextPath}/ckeditor/ckeditor.js"></script>
 </head>
 <body>
 <div style="height:38px;background-color:#b3b3ff ;margin:0 0 10px 0">
@@ -33,7 +33,7 @@
   <h3 style="text-align:center;margin:20px 0 ">用户注册</h3>
   <div class="row">
 	<form class="form-horizontal" id="registerForm" action="createUser" method ="post" autocomplete="on" enctype="multipart/form-data" role="form" >
-	  <div class="form-group">
+	  <%-- <div class="form-group">
 	    <label for="inviteCode" class="col-xs-2 control-label">邀请码<span style="color:red">*</span></label>
 	    <div class="col-xs-5">
 	      <input type="text" class="form-control" id="inviteCode" name="inviteCode" title="邀请码" value="${param.inviteCode}" required readonly>
@@ -43,7 +43,7 @@
 	      </div>
 	      </c:if>
 	    </div>
-	  </div>
+	  </div> --%>
 	  <div class="form-group">
 	    <label for="username" class="col-xs-2 control-label">用户名<span style="color:red">*</span></label>
 	    <div class="col-xs-5">
@@ -87,7 +87,7 @@
 	  <div class="form-group">
         <label for="age" class="col-xs-2 control-label">生日</label>
         <div class="col-xs-3">
-          <input class="form-control" type="date" id="birthday" name="birthday" placeholder="请输入年龄" value="${param.birthday }">
+          <input class="form-control" type="date" id="birthday" name="birthday" placeholder="请输入生日（2010-09-09）" value="${param.birthday }">
           <c:if test="${not empty birthday}">
 	      <div class="alert alert-warning alert-dismissable">${birthday}
 	        <button type="button" class="close" data-dismiss="alert"  aria-hidden="true"> &times;</button>
@@ -99,9 +99,9 @@
         <label  for="sex" class="col-xs-2 control-label">性别</label>
         <div class="col-xs-3">
           <select class="form-control" id="sex" name="sex" >
-           <option value="0">男</option>
-           <option value="1">女</option>
-           <option value="2">其他</option>
+           <option value="M">男</option>
+           <option value="F">女</option>
+           <option value="N">保密</option>
           </select>
         </div>
          <c:if test="${not empty sex}">

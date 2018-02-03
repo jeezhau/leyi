@@ -11,17 +11,25 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
-public class LogInterceptor extends HandlerInterceptorAdapter{
-	Logger log = LoggerFactory.getLogger(LogInterceptor.class);
+import me.jeekhan.leyi.dto.Operator;
+
+public class AccessLogInterceptor extends HandlerInterceptorAdapter{
+	Logger log = LoggerFactory.getLogger(AccessLogInterceptor.class);
 	@Override
 	public void afterCompletion(
 			HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
 			throws Exception {
         String requestUri = request.getRequestURI();  
-        String contextPath = request.getContextPath();  
-        String url = requestUri.substring(contextPath.length());  
+        //String contextPath = request.getContextPath();  
+        //String url = requestUri.substring(contextPath.length());  
         
-        log.info("requestUri:"+requestUri);    
+        String contextPath =  (String)request.getSession().getAttribute("contextPath"); //系统应用上下文
+        if(contextPath == null || contextPath.length()<1) {
+        		contextPath = request.getContextPath();
+        		request.getSession().setAttribute("contextPath", contextPath);
+        }
+        	//String url = requestUri.substring(contextPath.length()); 
+        log.info("requestUri:"+requestUri);    //记录访问资源路径
 //		Enumeration<String> attrs = request.getAttributeNames();
 //		System.out.println("===========属性：==============");
 //		while(attrs.hasMoreElements()){

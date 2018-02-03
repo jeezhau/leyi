@@ -1,4 +1,4 @@
-package me.jeekhan.leyi.controller;
+package me.jeekhan.leyi.controller.user;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -26,7 +26,6 @@ import me.jeekhan.leyi.common.ErrorCodes;
 import me.jeekhan.leyi.common.SysPropUtil;
 import me.jeekhan.leyi.dto.Operator;
 import me.jeekhan.leyi.model.UserFullInfo;
-import me.jeekhan.leyi.service.ArticleService;
 import me.jeekhan.leyi.service.UserService;
 
 /**
@@ -126,7 +125,14 @@ public class LoginAction {
 //			map.put("inviteCode", "邀请码不正确或已被使用");
 //			return "register";
 //		}
+		//头像文件重命名
+		String fileName = null;
+		if(file != null && !file.isEmpty()){
+			fileName = java.util.UUID.randomUUID().toString() + "." + file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf('.')+1);
+			userInfo.setPicture(fileName);
+		}
 		//数据保存至数据库
+		userInfo.setPicture(fileName);
 		Long id = userService.saveUser(userInfo);
 		if(id<=0){	//保存失败
 			if(id == ErrorCodes.USER_USERNAME_USED){
@@ -135,14 +141,9 @@ public class LoginAction {
 			if(id == ErrorCodes.USER_EMAIL_USED){
 				map.put("email", "该邮箱已被使用！");
 			}
-			return "register";	//返回注册页面
+			return "forward:/register.jsp";	//返回注册页面
 		}
-		//头像文件重命名
-		String fileName = null;
-		if(file != null && !file.isEmpty()){
-			fileName = java.util.UUID.randomUUID().toString() + "." + file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf('.')+1);
-			userInfo.setPicture(fileName);
-		}
+
 		//文件保存至用户自己的文件夹
 		if(file != null && !file.isEmpty()){
 			String path = SysPropUtil.getParam("DIR_USER_UPLOAD") + "USER_" + id.longValue() + "/";  //用户文件夹
@@ -150,7 +151,7 @@ public class LoginAction {
 			if(!dir.exists()){
 				dir.mkdirs();
 			}
-			userInfo.setPicture(fileName);
+			
 			FileOutputStream out = new FileOutputStream(path + fileName);
 			InputStream in = file.getInputStream();
 			byte[] buf = new byte[1024];

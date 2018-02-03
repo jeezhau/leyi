@@ -1,5 +1,5 @@
 <%--系统错误页面 --%>
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" isErrorPage="true"%>
 <%@ page import="java.util.*,me.jeekhan.leyi.common.*"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
@@ -25,32 +25,9 @@
 <!-- 页面顶部留白 -->
 </div>
 <div class="container">
-  
-<c:if test="${not empty param.error}">
-	<!-- 错误提示模态框（Modal） -->
-	<div class="modal fade " id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorTitle" aria-hidden="false" data-backdrop="static">
-   		<div class="modal-dialog">
-      		<div class="modal-content">
-         		<div class="modal-header">
-            			<button type="button" class="close" data-dismiss="modal"  aria-hidden="true">× </button>
-            			<h4 class="modal-title" id="errorTitle">系统错误</h4>
-         		</div>
-         		<div class="modal-body">
-           			<p> ${param.error} </p><p/>
-           			<p>如果您还没登录，请先登录！<a href="${contextPath}/login.jsp">登录</a></p>
-         		</div>
-         		<div class="modal-footer">
-         			<div style="margin-left:50px">
-             			<button type="button" class="btn btn-default" onclick="window.opener=null;window.close();" >关闭</button>
-            			</div>
-         		</div>
-      		</div><!-- /.modal-content -->
-   		</div><!-- /.modal-dialog -->
-	</div><!-- /.modal -->
-<script>
-$("#errorModal").modal('show');
-</script>
-</c:if>
+<%
+	exception.printStackTrace();
+%>
 </div>
 </body>
 </html>

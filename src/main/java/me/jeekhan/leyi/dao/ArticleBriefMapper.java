@@ -27,15 +27,14 @@ public interface ArticleBriefMapper {
     Long updateByPrimaryKey(ArticleBrief record);
     
     //根据查询条件统计指定用户的文章数量
-    int countArticlesByUser(@Param("userId") Long userId,@Param("isSelf")boolean isSelf,Map<String,Object>params,
-    		@Param("pageCond") PageCond pageCond);
+    int countArticlesByUser(@Param("userId") Long userId,@Param("isSelf")boolean isSelf,Map<String,Object>params);
     
     //根据查询条件获取指定用户的文章信息，以热度排序
     List<ArticleBrief> selectArticlesByUser(@Param("userId") Long userId,@Param("isSelf")boolean isSelf,Map<String,Object>params,
     		@Param("pageCond") PageCond pageCond);
     
     //根据查询条件统计系统所有用户的文章数量 
-    int countArticlesAll(@Param("isSelf")boolean isSelf,Map<String,Object>params,@Param("pageCond") PageCond pageCond);
+    int countArticlesAll(@Param("isSelf")boolean isSelf,Map<String,Object>params );
     
     //根据查询条件获取系统所有用户的文章信息，以热度排序 
     List<ArticleBrief> selectArticlesAll(@Param("isSelf")boolean isSelf,Map<String,Object>params,@Param("pageCond") PageCond pageCond);

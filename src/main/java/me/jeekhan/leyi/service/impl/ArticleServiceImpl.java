@@ -12,11 +12,11 @@ import me.jeekhan.leyi.common.PageCond;
 import me.jeekhan.leyi.dao.ArticleBriefMapper;
 import me.jeekhan.leyi.dao.ArticleDetailMapper;
 import me.jeekhan.leyi.dao.ReviewInfoMapper;
-import me.jeekhan.leyi.dao.ThemeInfoMapper;
+import me.jeekhan.leyi.dao.ThemeClassMapper;
 import me.jeekhan.leyi.model.ArticleBrief;
 import me.jeekhan.leyi.model.ArticleDetail;
 import me.jeekhan.leyi.model.ReviewInfo;
-import me.jeekhan.leyi.model.ThemeInfo;
+import me.jeekhan.leyi.model.ThemeClass;
 import me.jeekhan.leyi.service.ArticleService;
 
 /**
@@ -34,7 +34,7 @@ public class ArticleServiceImpl implements ArticleService {
 	@Autowired
 	private ReviewInfoMapper reviewInfoMapper;
 	@Autowired
-	private ThemeInfoMapper themeInfoMapper;
+	private ThemeClassMapper themeClassMapper;
 	/**
 	 * 获取指定文章概要信息
 	 * @param articleId	文章ID
@@ -99,7 +99,7 @@ public class ArticleServiceImpl implements ArticleService {
 			return ErrorCodes.LESS_INFO;
 		}
 		//主题验证
-		ThemeInfo theme = themeInfoMapper.selectByPrimaryKey(articleBrief.getThemeId());
+		ThemeClass theme = themeClassMapper.selectByPrimaryKey(articleBrief.getThemeId());
 		if(theme == null || !theme.getOwnerId().equals(articleBrief.getOwnerId())) {
 			return ErrorCodes.ARTICLE_THEMEID_ERROR;	//主题ID非法
 		}
@@ -112,8 +112,9 @@ public class ArticleServiceImpl implements ArticleService {
 			Long id = articleBriefMapper.selectLatestRecrod(articleBrief).getId();	//取刚插入的一条文章
 			return id;
 		}else{	//修改
+			//检查是否有该文章
 			ArticleBrief tmp = articleBriefMapper.selectByPrimaryKey(articleBrief.getId());
-			if(!tmp.getOwnerId().equals(articleBrief.getId())) {
+			if(!tmp.getOwnerId().equals(articleBrief.getOwnerId())) {
 				return ErrorCodes.ARTICLE_ID_ERROR;	//文章ID非法
 			}
 			articleBriefMapper.updateByPrimaryKey(articleBrief);

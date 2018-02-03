@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="me.jeekhan.leyi.dao.UserFullInfoMapper" >
   <resultMap id="BaseResultMap" type="me.jeekhan.leyi.model.UserFullInfo" >
-    <id column="id" property="id" jdbcType="Long" />
+    <id column="id" property="id" jdbcType="INTEGER" />
     <result column="username" property="username" jdbcType="VARCHAR" />
     <result column="email" property="email" jdbcType="VARCHAR" />
     <result column="birthday" property="birthday" jdbcType="DATE" />
@@ -28,7 +28,7 @@
     select 
     <include refid="Base_Column_List" />
     from tb_user_full_info
-    where id = #{id,jdbcType=LONG}
+    where id = #{id,jdbcType=INTEGER}
   </select>
   
   <!-- 根据用户名或邮箱获取用户信息-->
@@ -43,7 +43,7 @@
   <update id="updateStatus" parameterType="map" >
     update tb_user_full_info
     set enabled = #{status,jdbcType=CHAR} 
-    where id = #{id,jdbcType=LONG}
+    where id = #{id,jdbcType=INTEGER}
   </update>
   
   <insert id="insert" parameterType="me.jeekhan.leyi.model.UserFullInfo" >
@@ -52,10 +52,10 @@
       favourite, profession, introduce, 
       regist_time, update_time, status, 
       picture)
-    values (#{id,jdbcType=LONG}, #{username,jdbcType=VARCHAR}, #{email,jdbcType=VARCHAR}, 
+    values (#{id,jdbcType=INTEGER}, #{username,jdbcType=VARCHAR}, #{email,jdbcType=VARCHAR}, 
       #{birthday,jdbcType=DATE}, #{sex,jdbcType=CHAR}, #{passwd,jdbcType=VARCHAR}, #{city,jdbcType=VARCHAR}, 
       #{favourite,jdbcType=VARCHAR}, #{profession,jdbcType=VARCHAR}, #{introduce,jdbcType=VARCHAR}, 
-      #{registTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}, #{enabled,jdbcType=CHAR}, 
+      #{registTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}, #{status,jdbcType=CHAR}, 
       #{picture,jdbcType=VARCHAR})
   </insert>
   
@@ -102,7 +102,7 @@
         picture = #{picture,jdbcType=VARCHAR},
       </if>    
     </set>
-    where id = #{id,jdbcType=LONG}
+    where id = #{id,jdbcType=INTEGER}
   </update>
 
   <update id="updateByPrimaryKey" parameterType="me.jeekhan.leyi.model.UserFullInfo" >
@@ -120,7 +120,7 @@
       regist_time = #{registTime,jdbcType=TIMESTAMP},
       update_time = #{updateTime,jdbcType=TIMESTAMP},
       enabled = #{enabled,jdbcType=CHAR}
-    where id = #{id,jdbcType=LONG}
+    where id = #{id,jdbcType=INTEGER}
   </update>
   
   <!--获取系统当前推荐可用显示于主页的用户信息 -->

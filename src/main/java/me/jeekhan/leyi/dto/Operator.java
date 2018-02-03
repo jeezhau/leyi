@@ -3,7 +3,7 @@ package me.jeekhan.leyi.dto;
 import java.util.List;
 import java.util.Map;
 
-import me.jeekhan.leyi.model.ThemeInfo;
+import me.jeekhan.leyi.model.ThemeClass;
 /**
  * 系统内存中操作人员信息
  * @author jeekhan
@@ -17,7 +17,7 @@ public class Operator {
 	//用户的级别
 	private int level;
 	//用户的一级主题
-	private List<ThemeInfo> topThemes;
+	private List<ThemeClass> topThemes;
 	
 	public String getUsername() {
 		return username;
@@ -43,11 +43,11 @@ public class Operator {
 		this.level = level;
 	}
 
-	public List<ThemeInfo> getTopThemes() {
+	public List<ThemeClass> getTopThemes() {
 		return topThemes;
 	}
 
-	public void setTopThemes(List<ThemeInfo> topThemes) {
+	public void setTopThemes(List<ThemeClass> topThemes) {
 		this.topThemes = topThemes;
 	}
 	

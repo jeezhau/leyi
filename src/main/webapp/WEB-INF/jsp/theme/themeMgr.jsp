@@ -1,12 +1,8 @@
-<%--
-主题管理页面
-1、功能菜单：新增主题
-
- --%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="me.jeekhan.leyi.model.*,java.util.*,me.jeekhan.leyi.common.*"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%> 
 <%@ taglib tagdir="/WEB-INF/tags" prefix="jk"%>
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -14,153 +10,250 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">  
-  <title>主题分类管理</title>
+  <title>${operator.username}——主题分类管理</title>
   <meta name="description" content="">
   <meta name="author" content="jeekhan">
-  <link rel="shortcut icon" href="/leyi/images/leyi.ico" type="image/x-icon" />
+  <link rel="shortcut icon" href="${contextPath}/images${contextPath}.ico" type="image/x-icon" />
   <link rel="stylesheet" href="http://apps.bdimg.com/libs/bootstrap/3.3.0/css/bootstrap.min.css">  
   <script src="http://apps.bdimg.com/libs/jquery/2.1.1/jquery.min.js"></script>
   <script src="http://apps.bdimg.com/libs/bootstrap/3.3.0/js/bootstrap.min.js"></script>
 
 </head>
 <body style="background-color: #efefef;">  
-<div style="height:38px;background-color:#b3b3ff ">
-<%--页面顶部留白 --%>
+<div style="height:38px;background-color:#b3b3ff;margin-bottom:5px; ">
+
 </div>
 <div class="container">
-<jk:topMenuBar></jk:topMenuBar> <%--显示用户的顶层功能菜单 --%>
-<p class="text-danger h4">系统支持3级分类，1级可有3个分类（分类名称不可超过10个字符），2、3级可有5个分类（分类名称不可超过10个字符）。</p>
-<div class="row"><!-- 一级菜单容器 -->
-  <c:forEach items="${topThemes}" var="item">
-  <%--页面分为三列，每一列一个顶级主题 --%>
-  <div class="col-xs-12 col-md-4" style="padding:1px;border-radius:0;">
-  <div class="panel panel-default" style="border-radius:0;">
-    <div class="panel-heading">
-      <div class="row">
-	  <div class="col-xs-10">${item.name }</div>
-	  <div class="col-xs-2 text-right"><a class=" glyphicon glyphicon-pencil text-right" style="text-decoration:none;" onclick='showClassEditor(1,"${item.name}",${item})'></a></div>
-	  </div>
-	</div>
-    <div class="panel-body">
-      <ul class="list-group"><!-- 二级主题 -->
-       <c:if test="${!empty item.children}"><!-- 有二级主题 -->
-       <c:forEach items="${item.children}" var="item1" varStatus="sta">
-	    <li class="list-group-item"><!-- 二级菜单项 -->
-	    <div class="row">
-	      <span class="col-xs-9">${item1.name }</span>
-	      <div class="col-xs-1">
-		      <a class="dropdown-toggle" type="button" id="${item1.logicId}" data-toggle="dropdown"><span class="glyphicon glyphicon-list-alt"></span></a>
-			  <ul class="dropdown-menu dropdown-menu-right list-group" role="menu" aria-labelledby="${item1.logicId}"><!-- 三级菜单 -->
-			    <c:if test="${!empty item1.children}"><!-- 有三级主题 -->
-			    <c:forEach items="${item1.children}" var="item2" varStatus="sta">
-			      <li class="list-group-item" role="presentation" ><!-- 三级菜单项 -->
-			      <div class="row">
-			        <span class="col-xs-10">${item2.name}</span>
-	                <a class="glyphicon glyphicon-pencil" style="text-decoration:none;" onclick='showClassEditor(3,"${item2.logicId}",${item2})'></a>
-	              </div>
-			    </li><!-- 三级菜单项 -->
-			    </c:forEach>
-			    </c:if>
-			    <c:if test="${fn:length(item1.children)<6}">
-			    <li class="list-group-item" role="presentation" ><!-- 新增三级菜单项 -->
-			      <div class="row">
-			        <span class="col-xs-10">分类名称</span>
-	                <a class="glyphicon glyphicon-pencil" style="text-decoration:none;" onclick="showClassEditor(3,'${item1.logicId}')"></a>
-	              </div>
-			    </li><!-- 三级菜单项 -->
-			    </c:if>
-			  </ul><!-- 三级菜单 -->
-		  </div>
-		  <a class=" col-xs-1 glyphicon glyphicon-pencil" style="text-decoration:none;" onclick='showClassEditor(2,"${item1.logicId}",${item1})'></a>
-	     </div>
-	    </li>  <!-- 二级菜单项 -->	
-	    </c:forEach>
-	    </c:if>
-	    <c:if test="${!empty item.logicId and fn:length(item.children)<6 }">
-	    <li class="list-group-item" role="presentation" ><!-- 新增二级菜单项-->
-	      <div class="row">
-	        <span class="col-xs-10">分类名称</span>
-	        <span class="col-xs-1 "> </span>
-            <a class=" col-xs-1 glyphicon glyphicon-pencil" style="text-decoration:none;" onclick="showClassEditor(2,'${item.logicId}')"></a>
-          </div>
-	    </li><!-- 新增二级菜单项 -->
-	    </c:if>   	    
-	  </ul> <!-- 二级菜单 -->
-   </div>
+  <jk:topSysMenuBar></jk:topSysMenuBar>  
+  <div class="row">
+	<!-- 左面主题 -->
+    <div class="col-xs-4" >
+      <div class="panel panel-info">
+   	    <div class="panel-heading" style="margin:0">
+          <ol class="breadcrumb" style="margin:0;">
+           <li class="active"><a href="${contextPath}/${operator.username}/theme_mgr/">ROOT</a></li>
+	      <c:forEach items="${themeTreeUp}" var="item">
+	       <c:if test="${currTheme.id==item.id}"> <li class="active">${item.name}</li> </c:if>
+	       <c:if test="${currTheme.id!=item.id}"> <li><a href="${contextPath}/${operator.username}/theme_mgr/theme/${item.id}">${item.name}</a></li> </c:if>
+	      </c:forEach>
+	      <%-- 
+	      <c:if test="${not empty childrenThemes and themeTreeUp==null}"><span style="color:red">请选择待操作的主题！</span></c:if>
+		  <c:if test="${empty childrenThemes and themeTreeUp==null}"><span style="color:red">您还没有主题，请添加！</span></c:if>
+	       --%>
+	      </ol>
+        </div>
+	   	<ul class="list-group">
+	     <c:forEach items="${childrenThemes}" var="item">
+	       <li class="list-group-item"><a href="${contextPath}/${operator.username}/theme_mgr/theme/${item.id}">${item.name}</a></li>
+	     </c:forEach>
+	   	</ul>
+  	  </div>
+    </div><!-- end of 左面主题 -->
+    <!-- 右面当前主题信息 -->
+    <div class="col-xs-8" >
+      <div class="panel panel-info">
+        <div class="panel-heading" style="margin:0">
+          <button type="button" class="btn btn-default" id = "startNew">新增下级</button>
+	      <button type="button" class="btn btn-default" id = "updCurr" >修改当前</button>
+          <button type="button" class="btn btn-default" id = "delCurr" >删除当前</button>
+        </div>
+      <form class="form-horizontal" id="themeForm" action="" method ="post" role="form" enctype="multipart/form-data" role="form">
+        <div class="form-group">
+           <input type="hidden" id="themeId" name="id" value="${currTheme.id}">
+           <input type="hidden" id="parentSeq" name="parentSeq" value="${currTheme.parentSeq}/${currTheme.id}">
+        </div>
+       	<div class="form-group">
+	      <label for="keywords" class="col-sm-2 control-label">主题名称<span style="color:red">*</span></label>
+	      <div class="col-sm-10">
+	        <input class="form-control" name="name" id="themeName" type="text" value="${currTheme.name }" maxlength=25 required readonly placeholder="请输入主题名称..." >
+	        <c:if test="${not empty valid.name}">
+	        <div class="alert alert-warning alert-dismissable">${valid.name}
+	          <button type="button" class="close" data-dismiss="alert"  aria-hidden="true"> &times;</button>
+	        </div>
+		    </c:if>
+	      </div>
+	    </div>     	
+      	<div class="form-group">
+	      <label for="keywords" class="col-sm-2 control-label">关键词<span style="color:red">*</span></label>
+	      <div class="col-sm-10">
+	        <textarea class="form-control" id="keywords" name="keywords" maxLength=255 required readonly placeholder="请输入关键词，使用逗号分隔">${currTheme.keywords}</textarea>
+	        <c:if test="${not empty valid.keywords}">
+	        <div class="alert alert-warning alert-dismissable">${valid.keywords}
+	          <button type="button" class="close" data-dismiss="alert"  aria-hidden="true"> &times;</button>
+	        </div>
+		    </c:if>
+	      </div>
+	    </div>
+      	<div class="form-group">
+	      <label for="keywords" class="col-sm-2 control-label">主题描述</label>
+	      <div class="col-sm-10">
+	        <textarea  class="form-control" name="content" id="themeContent" rows="8" maxlength=600  readonly placeholder="请输入主题描述..." >${currTheme.content}</textarea>
+	        <c:if test="${not empty valid.content}">
+	        <div class="alert alert-warning alert-dismissable">${valid.content}
+	          <button type="button" class="close" data-dismiss="alert"  aria-hidden="true"> &times;</button>
+	        </div>
+		    </c:if>
+	      </div>
+	    </div>
+	    <div class="form-group">
+         <div class="col-sm-offset-5 col-sm-10">
+           <button type="submit" class="btn btn-info" id="save" style="margin:20px">&nbsp;&nbsp;提 交&nbsp;&nbsp;</button>
+           <button type="button" class="btn btn-warning" id="reset" style="margin:20px">&nbsp;&nbsp;重 置&nbsp;&nbsp; </button>
+           <button type="submit" class="btn btn-danger" id="delete" style="margin:20px">&nbsp;&nbsp;删 除&nbsp;&nbsp;</button>
+         </div>
+        </div>	         
+      </form>
+    </div><!-- end of 右面当前主题信息 -->
   </div>
-  </div>
-  </c:forEach>
+  </div>   
 </div>
-</div><!-- container -->
-<!-- 主题分类模态框（Modal） -->
-<div class="modal fade " id="themeModal" tabindex="-1" role="dialog" aria-labelledby="themeModalLabel" aria-hidden="true" data-backdrop="static">
-   <div class="modal-dialog">
-      <div class="modal-content">
-         <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal"  aria-hidden="true">× </button>
-            <h4 class="modal-title text-center" id="themeModalLabel">新增主题分类</h4>
-         </div>
-         <div class="modal-body">
-            <form class="form-horizontal" id="themeForm" method ="post" action="add" role="form" >
-               <div class="form-group">
-                  <input type="hidden" id="themeId" name="id" value="">
-                  <input type="hidden" id="classLvl" name="classLvl" value="">
-               	  <input type="hidden" id="logicId" name="logicId" value="">
-               </div>
-			   <div class="form-group">
-			      <label class="col-xs-2 control-label">主题名称</label>
-			      <div class="col-xs-10">
-			         <input class="form-control" name="name" id="themeName" type="text" value="" maxlength=7 required placeholder="请输入主题名称..." >
-			      </div>
-			   </div>
-			   <div class="form-group">
-			      <label for="keywords" class="col-xs-2 control-label">关键词</label>
-			      <div class="col-xs-10">
-			         <textarea class="form-control" name="keywords" id="keywords" maxlength=255 required placeholder="请输入关键词..." ></textarea>
-			      </div>
-			   </div>
-			   <div class="form-group has-success">
-			      <label class="col-xs-2 control-label" for="themeDesc">主题描述</label>
-			      <div class="col-xs-10">
-			         <textarea  class="form-control" name="descInfo" id="themeDesc" rows="8" maxlength=600 required placeholder="请输入主题描述..." ></textarea>
-			      </div>
-			   </div>
-			</form>
-         </div>
-         <div class="modal-footer">
-            <span class="col-xs-4"></span>
-            <button type="submit" class="col-xs-2 btn btn-primary" id="submit">提交</button>
-            <button type="button" class="col-xs-2 btn btn-danger" data-dismiss="modal">关闭</button>
-            <span class="col-xs-4"></span>
-         </div>
-      </div><!-- /.modal-content -->
-   </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
+  
 <script>
-/**
- * param classLvl	分类级别信息
- */
-function showClassEditor(classLvl,logicId,data){
-	$("#themeForm")[0].reset();
-	$("#themeModal").modal('show');	//打卡编辑对话框
-	$("#classLvl").val(classLvl);
-	$("#logicId").val(logicId);
-	if(data){//编辑模式，设置初值
-		$('#themeId').val(data.id);
-		$("#logicId").val(data.logicId);
-		$("#themeName").val(data.name);
-		$("#keywords").val(data.keywords);
-		$("#themeDesc").val(data.descInfo);
-	}
+var themeId = '${currTheme.id}';//当前主题的ID
+var themeSeq = '${currTheme.parentSeq}/${currTheme.id}';//当前主题的ID序列
+if(themeSeq.indexOf("//")>=0){
+	themeSeq = themeSeq.substring(1);
 }
-$(function(){ 
-	$("#submit").click(function(){
-		$("#themeForm").submit();
-		$("#themeModal").modal('hide');
-	});
+var noConfirm = false;//是否不需要进行一级主题创建提示
+function startNew(){
+	if(!noConfirm && (themeId == null || themeId == "")){
+		if(confirm("您没有还有选中主题，确定是要添加一级主题吗？如果不是，请先选择主题！")){
+			themeSeq = "/";
+		}else{
+			return false;
+		}
+	}
+	$("#themeId").val('');
+	$("#parentSeq").val(themeSeq);
+	$("#themeName").attr("readOnly",false);
+	$("#themeName").val('');
+	$("#keywords").attr("readOnly",false);
+	$("#keywords").val('');
+	$("#themeContent").attr("readOnly",false);
+	$("#themeContent").val('');
+	
+	$("#save").show();
+	$("#reset").show();
+	$("#delete").hide();
+}
+
+function updCurr(){
+	if( '${fn:length(themeTreeUp)}'<1) { 
+		alert('请先选择主题！'); 
+		return false;
+	}
+	$("#themeId").val(themeId);
+	$("#parentSeq").val('');
+	$("#themeName").attr("readOnly",false);
+	$("#themeName").val('${currTheme.name}');
+	$("#keywords").attr("readOnly",false);
+	$("#keywords").val('${currTheme.keywords}');
+	$("#themeContent").attr("readOnly",false);
+	$("#themeContent").val('${currTheme.content}');	
+	$("#save").show();
+	$("#reset").show();
+	$("#delete").hide();
+}
+//页面初始化
+$("#save").hide();
+$("#reset").hide();
+$("#delete").hide();
+$("#startNew").click(startNew);
+
+$("#updCurr").click(updCurr);
+$("#delCurr").click(function(){
+	if( '${fn:length(themeTreeUp)}'<1) { 
+		alert('请先选择主题！'); 
+		return false;
+	}
+	$("#themeId").val(themeId);
+	$("#parentSeq").val('');
+	$("#themeName").attr("readOnly",true);
+	$("#themeName").val('${currTheme.name}');
+	$("#keywords").attr("readOnly",true);
+	$("#keywords").val('${currTheme.keywords}');
+	$("#themeContent").attr("readOnly",true);
+	$("#themeContent").val('${currTheme.content}');
+	$("#delete").show();
+	$("#save").hide();
+	$("#reset").hide();
 });
+$("#delete").click(function(){
+	if(confirm("您确定要删除主题【${currTheme.name}】吗？")){
+		$("#themeForm").attr('action','${contextPath}/${operator.username}/theme_mgr/delete');
+		return true
+	}
+	return false
+});
+$("#save").click(function(){
+	if($("#themeId").val()){
+		$("#themeForm").attr('action','${contextPath}/${operator.username}/theme_mgr/update');
+	}else{
+		$("#themeForm").attr('action','${contextPath}/${operator.username}/theme_mgr/add');
+	}
+	return true;
+});
+$("#reset").click(function(){
+	if($("#themeId").val()){
+		$("#themeName").attr("readOnly",false);
+		$("#themeName").val('${currTheme.name}');
+		$("#keywords").attr("readOnly",false);
+		$("#keywords").val('${currTheme.keywords}');
+		$("#themeContent").attr("readOnly",false);
+		$("#themeContent").val('${currTheme.content}');
+	}else{
+		$("#themeName").attr("readOnly",false);
+		$("#themeName").val('');
+		$("#keywords").attr("readOnly",false);
+		$("#keywords").val('');
+		$("#themeContent").attr("readOnly",false);
+		$("#themeContent").val('');
+	}
+});
+	
+
 </script>
 
-</body>
+ <c:if test="${not empty param.error or not empty error}">
+ <!-- 错误提示模态框（Modal） -->
+ <div class="modal fade " id="tipModal" tabindex="-1" role="dialog" aria-labelledby="tipTitle" aria-hidden="false" data-backdrop="static">
+  <div class="modal-dialog">
+     <div class="modal-content">
+        <div class="modal-header">
+           <button type="button" class="close" data-dismiss="modal"  aria-hidden="true">× </button>
+           <h4 class="modal-title" id="tipTitle">提示信息</h4>
+        </div>
+        <div class="modal-body">
+          ${param.error} ${error}
+        </div>
+        <div class="modal-footer">
+        	<div style="margin-left:50px">
+            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+           </div>
+        </div>
+     </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<script>
+$("#tipModal").modal('show');
+if('${mode}' == "add"){
+	if(!themeSeq){
+		themeSeq = "/";
+	}
+	noConfirm = true;
+	startNew();
+	$("#themeId").val('');
+	$("#parentSeq").val(themeSeq);
+	$("#themeName").val('${theme.name}');
+	$("#keywords").val('${theme.keywords}');
+	$("#themeContent").val('${theme.content}');
+	$("#save").show();
+	$("#reset").show();
+}
+</script>
+</c:if>
 
+<jk:copyRight></jk:copyRight>
+
+</body>
 </html>

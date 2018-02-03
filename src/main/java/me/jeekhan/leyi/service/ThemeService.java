@@ -6,7 +6,7 @@ import org.apache.ibatis.annotations.Param;
 
 import me.jeekhan.leyi.common.PageCond;
 import me.jeekhan.leyi.model.ReviewInfo;
-import me.jeekhan.leyi.model.ThemeInfo;
+import me.jeekhan.leyi.model.ThemeClass;
 /**
  *  主题分类服务类
  * @author Jee Khan
@@ -18,7 +18,7 @@ public interface ThemeService {
 	 * @param theme
 	 * @return 主题ID
 	 */
-	public Long saveTheme(ThemeInfo theme);
+	public Long saveTheme(ThemeClass theme);
 	
 	/**
 	 * 逻辑删除主题分类
@@ -34,42 +34,42 @@ public interface ThemeService {
 	 * @param themeId	主题ID
 	 * @return
 	 */
-	public ThemeInfo getTheme(Long themeId);
+	public ThemeClass getTheme(Long themeId);
 	
 	/**
 	 * 根据主题名称取指定用户下的指定上级的主题信息
 	 * @param themeName 主题名称
-	 * @param parentId	上级主题ID序列
+	 * @param parentSeq	上级主题ID序列
 	 * @param ownerId	主题拥有者
 	 * @return
 	 */
-	public ThemeInfo getTheme(String themeName,String parentId,Long ownerId);
+	public ThemeClass getTheme(String themeName,String parentSeq,Long ownerId);
 
 	
     /**
      * 取指定用户的主题信息
      * 1、isSelf 为true 则为用户自己，可以取所有的下级信息，为false只可取审核通过的信息；
      * @param ownerId	主题拥有者 
-     * @param parentId	上级主题ID序列
+     * @param parentSeq	上级主题ID序列
      * @param isSelf		是否为用户自己
      * @return
      */
-	public List<ThemeInfo> getThemes(Long ownerId,String parentId,boolean isSelf);
+	public List<ThemeClass> getThemes(Long ownerId,String parentSeq,boolean isSelf);
 	
 	/**
 	 * 统计用户指定主题的下级主题数量
 	 * @param ownerId	主题拥有者
-	 * @param parentId	上级主题ID序列
+	 * @param parentSeq	上级主题ID序列
 	 * @return
 	 */
-    int countThemes(@Param("ownerId")Long ownerId,@Param("parentId")String parentId);
+    int countThemes(@Param("ownerId")Long ownerId,@Param("parentSeq")String parentSeq);
 		
 	/**
 	 * 获取待审核的主题记录
 	 * @param	pageCond	分页信息
 	 * @return
 	 */
-	public List<ThemeInfo> getThemes4Review(PageCond pageCond);
+	public List<ThemeClass> getThemes4Review(PageCond pageCond);
 	
 	/**
 	 * 主题审核
@@ -84,5 +84,7 @@ public interface ThemeService {
 	 * @return
 	 */
 	public int get4ReviewThemesCnt();
+	
+	
 	
 }

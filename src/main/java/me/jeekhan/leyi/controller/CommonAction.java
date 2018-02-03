@@ -12,6 +12,7 @@ import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.*;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,6 +26,8 @@ import org.springframework.web.multipart.MultipartFile;
 import me.jeekhan.leyi.common.FileFilter;
 import me.jeekhan.leyi.common.SysPropUtil;
 import me.jeekhan.leyi.dto.Operator;
+import me.jeekhan.leyi.model.UserFullInfo;
+import me.jeekhan.leyi.service.UserService;
 /**
  * 通用处理
  * @author Jee Khan
@@ -34,8 +37,8 @@ import me.jeekhan.leyi.dto.Operator;
 @RequestMapping("/common")
 @SessionAttributes({"operator"})
 public class CommonAction {
-	
-	
+	@Autowired
+	private UserService userService;
 	/**
 	 * Ckeditor上传图片
 	 * 【权限】
@@ -102,7 +105,8 @@ public class CommonAction {
 	 */
 	@RequestMapping(value="/showPic/{username}/{picName}")
 	public void getPersonPicture(@PathVariable("username")String username,@PathVariable("picName")String picName,OutputStream out,HttpServletRequest request,HttpServletResponse response) throws IOException{
-		String path = SysPropUtil.getParam("DIR_USER_UPLOAD") + username + "/"; 
+		UserFullInfo userInfo = userService.getUserFullInfo(username);
+		String path = SysPropUtil.getParam("DIR_USER_UPLOAD") + "USER_"+ userInfo.getId().longValue() + "/"; 
 		File dir = new File(path);
 		File[] files = dir.listFiles(new FileFilter(picName));
 		if(files != null && files.length>0){

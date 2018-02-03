@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="me.jeekhan.leyi.dao.ThemeClassMapper" >
+  <resultMap id="BaseResultMap" type="me.jeekhan.leyi.model.ThemeClass" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="parent_seq" property="parentSeq" jdbcType="VARCHAR" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="owner_id" property="ownerId" jdbcType="INTEGER" />
+    <result column="keywords" property="keywords" jdbcType="VARCHAR" />
+    <result column="content" property="content" jdbcType="VARCHAR" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="status" property="status" jdbcType="CHAR" />
+  </resultMap>
+  
+  <sql id="Base_Column_List" >
+    id,parent_seq, name, owner_id,keywords, content, update_time, status
+  </sql>
+  
+  <!--根据主键获取主题 -->
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from tb_theme_class
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  
+  <!--根据主题名称取指定用户下的指定上级的主题信息 -->
+  <select id="selectTheme" resultMap="BaseResultMap" parameterType="map" >
+    select 
+    <include refid="Base_Column_List" />
+    from tb_theme_class
+    where status in ('0','R','A') and 
+    name = #{name,jdbcType=VARCHAR} and owner_id=#{ownerId,jdbcType=INTEGER} and parent_seq=#{parentSeq,jdbcType=VARCHAR}
+  </select>
+  
+  <!--更新主题 状态：A-正常，0-待审核，R-拒绝,D-删除 -->
+  <update id="updateStatus" parameterType="map" >
+    update tb_theme_class
+    set status = #{status,jdbcType=CHAR} 
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  <!-- 新插入一条主题信息-->
+  <insert id="insert" parameterType="me.jeekhan.leyi.model.ThemeClass" keyProperty="id" >
+    insert into tb_theme_class (id, parent_seq, name, keywords, content, update_time, owner_id, status)
+    values (#{id,jdbcType=INTEGER}, #{parentSeq,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, 
+      #{keywords,jdbcType=VARCHAR}, #{content,jdbcType=VARCHAR}, #{updateTime,jdbcType=TIMESTAMP}, 
+      #{ownerId,jdbcType=INTEGER}, #{status,jdbcType=CHAR})
+  </insert>
+  
+  <!--根据主键更新主题信息 -->
+  <update id="update" parameterType="me.jeekhan.leyi.model.ThemeClass" >
+    update tb_theme_class
+    <set >
+      <if test="parentSeq != null" >
+        parent_seq = #{parentSeq,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null" >
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="keywords != null" >
+        keywords = #{keywords,jdbcType=VARCHAR},
+      </if>
+      <if test="content != null" >
+        content = #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null" >
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="ownerId != null" >
+        owner_id = #{ownerId,jdbcType=INTEGER},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=CHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  <!--取指定用户的主题信息 -->
+  <select id="selectUserThemes"  parameterType="map" resultMap="BaseResultMap" >
+    select 
+    <include refid="Base_Column_List" />
+    from tb_theme_class t
+    where t.status in ('A'<if test="isSelf">,'0','R'</if>) 
+    and t.owner_id = #{ownerId,jdbcType=INTEGER} and t.parent_seq = #{parentSeq,jdbcType=VARCHAR}
+    order by t.update_time desc
+  </select>
+  
+  <!-- 统计用户该层主题个数，仅包含正常与待审核状态-->
+  <select id="countUserThemes" parameterType="map" resultType="java.lang.Integer" >
+  	select count(1) CNT
+  	from tb_theme_class t 
+  	where t.status in ('A'<if test="isSelf">,'0','R'</if>) 
+  	and t.owner_id = #{ownerId,jdbcType=INTEGER} and t.parent_seq = #{parentSeq,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 获取待审核的主题-->
+  <select id="selectThemes4Review" parameterType="map" resultMap="BaseResultMap" >
+    select 
+    <include refid="Base_Column_List" />
+    from tb_theme_class
+    where status = '0'
+    order by update_time desc
+  	limit #{pageCond.begin},#{pageCond.pageSize}
+  </select>
+  
+  <!-- 统计待审核主题数量-->
+  <select id="countThemes4Review" resultType="java.lang.Integer" >
+  	select count(1) CNT 
+  	from tb_theme_class t 
+  	where t.status = '0' 
+  </select>	
+  
+  
+</mapper>
+

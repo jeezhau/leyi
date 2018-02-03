@@ -8,7 +8,7 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">  
-  <title>一叶知秋</title>
+  <title>乐学、乐享，快乐生活</title>
   <meta name="description" content="">
   <meta name="author" content="jeekhan">
   <link rel="shortcut icon" href="/leyi/images/leyi.ico" type="image/x-icon" />
@@ -24,15 +24,25 @@
 
 </div>
 <div class="container">
-	<jk:loginMenuBar></jk:loginMenuBar>
-	
+  <jk:topSysMenuBar></jk:topSysMenuBar>
   <div class="row">
-    <div class="col-md-3" ><jk:individualResume></jk:individualResume></div>	<!--左边个人简介  --> 
+    <div class="col-md-3" ><!--左边明星简介  --> 
+      <div style="background-color: #e6e6e6;" align="center">本期明星用户</div>
+      <c:forEach items="${hotUsers}" var="user">
+      <div class="thumbnail">
+	    <p align="center"> ${user.username} </p>
+	    <a target="_blank" href="${contextPath}/${user.username}"><img src="${contextPath}/common/showPic/${user.username}/${user.picture }" alt="惹人靓照"></a>
+	    <div class="caption">
+		  <p>${user.introduce}</p><!-- 个人简介 -->
+	    </div>
+      </div>
+      </c:forEach>
+    </div>
     <div class="col-md-9 light-gray-bg">	<!--中间主要内容 --> 
-	 <c:forEach items="${hotnew}" var="item">
+	 <c:forEach items="${hotArticles}" var="article">
 	  <div class="panel panel-info" style="margin-bottom:0px;border-radius:0;">
-	    <div class="panel-heading"><h4 class="panel-title"><a target="_blank" href="/leyi/${userInfo.username}/article/${item.id}">${item.name}</a></h4></div>
-		<div class="panel-body">${item.brief}</div>
+	    <div class="panel-heading"><h4 class="panel-title"><a target="_blank" href="${contextPath}/${userInfo.username}/article_mgr/detail/${article.id}">${article.name}</a></h4></div>
+		<div class="panel-body">${article.brief}</div>
 	  </div> <!-- 文章panel -->
 	 </c:forEach>
 	</div>

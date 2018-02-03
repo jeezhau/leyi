@@ -18,7 +18,6 @@ import me.jeekhan.leyi.service.UserService;
  *
  */
 @Controller
-
 public class SysIndexAction {
 	@Autowired
 	private UserService userService;
@@ -38,10 +37,10 @@ public class SysIndexAction {
 	 */
 	@RequestMapping(value="/")
 	public String accessIndex(Map<String,Object>map){
-		List<UserFullInfo> hotusers = userService.getSysIndexShowUser();
-		List<ArticleBrief> hotnews = articleService.getArticlesAll(false, null, null);
-		map.put("hotusers", hotusers);
-		map.put("hotnews", hotnews);
+		List<UserFullInfo> hotUsers = userService.getSysIndexShowUser();
+		List<ArticleBrief> hotArticles = articleService.getArticlesAll(false, null, null);
+		map.put("hotUsers", hotUsers);
+		map.put("hotArticles", hotArticles);
 		return "index";
 	}
 

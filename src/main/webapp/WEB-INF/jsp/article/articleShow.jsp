@@ -1,5 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="me.jeekhan.leyi.model.ThemeClass,java.util.*,me.jeekhan.leyi.common.*"%>
+<%@ page import="me.jeekhan.leyi.model.*,java.util.*,me.jeekhan.leyi.common.*"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib tagdir="/WEB-INF/tags" prefix="jk"%>
 <!DOCTYPE html>
@@ -11,23 +11,25 @@
   <title>${brief.name}</title>
   <meta name="description" content="">
   <meta name="author" content="jeekhan">
-  <link rel="shortcut icon" href="/leyi/images/leyi.ico" type="image/x-icon" />
-  <link rel="stylesheet" href="/leyi/bootstrap-3.3.5/css/bootstrap.min.css">  
+  <link rel="shortcut icon" href="${contextPath}/images${contextPath}.ico" type="image/x-icon" />
+  <link rel="stylesheet" href="${contextPath}/bootstrap-3.3.5/css/bootstrap.min.css">  
   <script src="http://apps.bdimg.com/libs/jquery/2.1.1/jquery.min.js"></script>
-  <script src="/leyi/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+  <script src="${contextPath}/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 
-  <script src="/leyi/ckeditor/ckeditor.js"></script>
+  <script src="${contextPath}/ckeditor/ckeditor.js"></script>
 </head>
 <body style="background-color: #efefef;">  
 <div style="height:38px;background-color:#b3b3ff ;margin-bottom:5px;">
 
 </div>
 <div class="container">
-  <jk:loginMenuBar></jk:loginMenuBar>
-  <div class="row">
+  <jk:topSysMenuBar></jk:topSysMenuBar>
+    <!-- 右侧边栏：目标用户信息 -->
+    <div class="col-sm-3 hidden-xs" >
+       <jk:targetUserResume></jk:targetUserResume>
+	</div>
    <!--======================中间主要内容  ===================--> 
     <div class="col-sm-9 light-gray-bg">
-	  <jk:topThemeBar></jk:topThemeBar><!-- 顶部主题分类 -->
 	  <div class="panel panel-info">
         <div class="panel-heading text-center"><h3 class="panel-title">${brief.name}</h3></div>
 	    <div class="panel-body">
@@ -60,7 +62,7 @@
 			  </div> 
 			  <div class="row">
 			    <hr>
-			    <div class="col-sm-12 "> ${content.content} </div>
+			    <div class="col-sm-12 "> ${detail.content} </div>
 			  </div>
 			  <c:if test="${mode == 'review'}">
 			  <div class="row">
@@ -81,11 +83,11 @@
 		         <script type="text/javascript">
 		         $(function(){ 
 			 		$("#accept").click(function(){
-						$("#reviewForm").attr('action','/leyi/${operator.username}/article_mgr/accept');
+						$("#reviewForm").attr('action','${contextPath}/${operator.username}/article_mgr/accept');
 						$("#reviewForm").submit();
 					});
 			 		$("#refuse").click(function(){
-						$("#reviewForm").attr('action','/leyi/${operator.username}/article_mgr/refuse');
+						$("#reviewForm").attr('action','${contextPath}/${operator.username}/article_mgr/refuse');
 						$("#reviewForm").submit();
 					});
 		         });
@@ -96,10 +98,6 @@
 	    </div>
 	  </div> <!-- 文章panel -->
     </div>
-     <!-- 左侧边栏 -->
-     <div class="col-sm-3 hidden-xs" >
-       <jk:individualResume></jk:individualResume>
-	</div>
   </div><!-- end of row -->
   
 </div>

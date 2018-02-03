@@ -3,7 +3,7 @@
 <mapper namespace="me.jeekhan.leyi.dao.ArticleDetailMapper" >
 	
   <resultMap id="BaseResultMap" type="me.jeekhan.leyi.model.ArticleDetail" >
-    <id column="article_id" property="articleId" jdbcType="Long" />
+    <id column="article_id" property="articleId" jdbcType="INTEGER" />
   </resultMap>
   
   <resultMap id="ResultMapWithBLOBs" type="me.jeekhan.leyi.model.ArticleDetail" extends="BaseResultMap" >
@@ -23,24 +23,24 @@
     <include refid="Base_Column_List" />
     ,
     <include refid="Blob_Column_List" />
-    from tb_article_content
-    where article_id = #{articleId,jdbcType=Long}
+    from tb_article_detail
+    where article_id = #{articleId,jdbcType=INTEGER}
   </select>
   
   <delete id="delete" parameterType="java.lang.Long" >
-    delete from tb_article_content
-    where article_id = #{articleId,jdbcType=Long}
+    delete from tb_article_detail
+    where article_id = #{articleId,jdbcType=INTEGER}
   </delete>
 
-  <insert id="insert" parameterType="me.jeekhan.leyi.model.ArticleContent" >
-    insert into tb_article_content (article_id, content)
-    values (#{articleId,jdbcType=Long}, #{content,jdbcType=LONGVARCHAR})
+  <insert id="insert" parameterType="me.jeekhan.leyi.model.ArticleDetail" >
+    insert into tb_article_detail (article_id, content)
+    values (#{articleId,jdbcType=INTEGER}, #{content,jdbcType=LONGVARCHAR})
   </insert>
  
-  <update id="update" parameterType="me.jeekhan.leyi.model.ArticleContent" >
-    update tb_article_content 
+  <update id="update" parameterType="me.jeekhan.leyi.model.ArticleDetail" >
+    update tb_article_detail 
     set content = #{content,jdbcType=LONGVARCHAR}
-    where article_id = #{articleId,jdbcType=Long}
+    where article_id = #{articleId,jdbcType=INTEGER}
   </update>
 
 

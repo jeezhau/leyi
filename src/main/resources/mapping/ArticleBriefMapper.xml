@@ -10,26 +10,26 @@
     <result column="theme_id" property="themeId" jdbcType="INTEGER" />
     <result column="type" property="type" jdbcType="CHAR" />
     <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
-    <result column="update_opr" property="updateOpr" jdbcType="INTEGER" />
-    <result column="enabled" property="enabled" jdbcType="CHAR" />
+    <result column="owner_id" property="ownerId" jdbcType="INTEGER" />
+    <result column="status" property="status" jdbcType="CHAR" />
   </resultMap>
   
   <sql id="Base_Column_List" >
-    id, name, keywords, brief, source, theme_id, type, update_time, update_opr, enabled
+    id, name, keywords, brief, source, theme_id, type, update_time, owner_id, status
   </sql>
   
   <!-- 根据主键取文章简介-->
-  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
     select 
     <include refid="Base_Column_List" />
     from tb_article_brief
     where id = #{id,jdbcType=INTEGER}
   </select>
   
-  <!--根据主键更新文章 状态：0-正常，1-待审核，D-删除，R-拒绝-->
-  <delete id="updateEnabledStatus" parameterType="map" >
+  <!--根据主键更新文章 状态：A-正常，0-待审核，D-删除，R-拒绝-->
+  <delete id="updateStatus" parameterType="map" >
     update tb_article_brief 
-    set enabled = #{enabled,jdbcType=CHAR}
+    set status = #{status,jdbcType=CHAR}
     where id = #{id,jdbcType=INTEGER}
   </delete>
   
@@ -37,12 +37,12 @@
   <insert id="insert" parameterType="me.jeekhan.leyi.model.ArticleBrief" >
     insert into tb_article_brief (id, name, keywords, 
       brief, source, theme_id, 
-      type, update_time, update_opr, 
-      enabled)
+      type, update_time, owner_id, 
+      status)
     values (#{id,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR}, #{keywords,jdbcType=VARCHAR}, 
       #{brief,jdbcType=VARCHAR}, #{source,jdbcType=CHAR}, #{themeId,jdbcType=INTEGER}, 
-      #{type,jdbcType=CHAR}, #{updateTime,jdbcType=TIMESTAMP}, #{updateOpr,jdbcType=INTEGER}, 
-      #{enabled,jdbcType=CHAR})
+      #{type,jdbcType=CHAR}, #{updateTime,jdbcType=TIMESTAMP}, #{ownerId,jdbcType=INTEGER}, 
+      #{status,jdbcType=CHAR})
   </insert>
   
   <!--根据主键更新全部文章简介信息-->
@@ -55,8 +55,8 @@
       theme_id = #{themeId,jdbcType=INTEGER},
       type = #{type,jdbcType=CHAR},
       update_time = #{updateTime,jdbcType=TIMESTAMP},
-      update_opr = #{updateOpr,jdbcType=INTEGER},
-      enabled = #{enabled,jdbcType=CHAR}
+      owner_id = #{ownerId,jdbcType=INTEGER},
+      status = #{status,jdbcType=CHAR}
     where id = #{id,jdbcType=INTEGER}
   </update>
   
@@ -65,9 +65,9 @@
   	select 
   	<include refid="Base_Column_List"/>
   	from tb_article_brief b
-  	where b.enabled in ('0'<if test="isSelf" >,'1','R'</if>)
-  	 and update_opr = #{userId}
-  	order by (UNIX_TIMESTAMP(b.update_time)/3600/24 + (select count(1) from tb_comments c where c.article_id = b.id and c.enabled=0)) desc
+  	where b.status in ('A'<if test="isSelf" >,'0','R'</if>)
+  	 and owner_id = #{userId}
+  	order by (UNIX_TIMESTAMP(b.update_time)/3600/24 + (select count(1) from tb_comments c where c.article_id = b.id and c.status=0)) desc
   	limit #{pageCond.begin},#{pageCond.pageSize}
   </select>
   
@@ -75,36 +75,33 @@
   <select id="countArticlesByUser" parameterType="map" resultType="java.lang.Integer" >
   	select count(1) CNT
   	from tb_article_brief b
-  	where b.enabled in ('0'<if test="isSelf" >,'1','R'</if>)
-  	 and update_opr = #{userId}
-  </select>
-  
-  <!--取指定主题下的所有文章简介 -->
-  <select id="selectArticlesByTheme" parameterType="map" resultMap="BaseResultMap">
-  	select 
-  	<include refid="Base_Column_List"/>
-  	from tb_article_brief b
-  	where b.enabled in ('0'<if test="isSelf" >,'1','R'</if>)
-  	and b.theme_id in (select t1.id from tb_theme_class t1 where t1.logic_id like CONCAT(#{logicId},'%')) 
-  	order by (UNIX_TIMESTAMP(b.update_time)/3600/24 + (select count(1) from tb_comments c where c.article_id = b.id and c.enabled=0)) desc
-  	limit #{pageCond.begin},#{pageCond.pageSize}
+  	where b.status in ('A'<if test="isSelf" >,'0','R'</if>)
+  	 and owner_id = #{userId}
   </select> 
   
     <!--取指定主题下的所有文章简介数量 -->
   <select id="countArticlesByTheme" parameterType="map" resultType="java.lang.Integer">
   	select count(1) CNT
   	from tb_article_brief b
-  	where b.enabled in ('0'<if test="isSelf" >,'1','R'</if>)
+  	where b.status in ('A'<if test="isSelf" >,'0','R'</if>)
   	and b.theme_id in (select t1.id from tb_theme_class t1 where t1.logic_id like CONCAT(#{logicId},'%')) 
   </select>
-  
-  <!-- 取所有用户文章 -->
-  <select id="selectArticles" parameterType="map" resultMap="BaseResultMap">
+
+  <!-- 统计系统文章数量 -->
+  <select id="countArticlesAll" parameterType="map" resultMap="BaseResultMap">
+  	select count(1) CNT
+  	from tb_article_brief b
+  	where b.status in ('A'<if test="isSelf" >,'0','R'</if>)
+  	
+  </select>
+    
+  <!-- 获取系统所有文章， -->
+  <select id="selectArticlesAll" parameterType="map" resultMap="BaseResultMap">
   	select 
   	<include refid="Base_Column_List"/>
   	from tb_article_brief b
-  	where b.enabled in ('0'<if test="isSelf" >,'1','R'</if>)
-  	order by (UNIX_TIMESTAMP(b.update_time)/3600/24 + (select count(1) from tb_comments c where c.article_id = b.id and c.enabled=0)) desc
+  	where b.status in ('A'<if test="isSelf" >,'0','R'</if>)
+  	
   	limit #{pageCond.begin},#{pageCond.pageSize}
   </select>
   
@@ -114,7 +111,7 @@
   	<include refid="Base_Column_List"/>
   	from tb_article_brief 
   	where id = ( select max(id) from tb_article_brief b 
-		where b.theme_id = #{themeId} and b.`name` = #{name} and b.keywords = #{keywords} and b.source=#{source} and b.type=#{type} and b.update_opr=#{updateOpr})
+		where b.theme_id = #{themeId} and b.`name` = #{name} and b.keywords = #{keywords} and b.source=#{source} and b.type=#{type} and b.owner_id=#{ownerId})
   </select> 
   
   <!-- 取待审核的最新10条文章简介 -->
@@ -122,7 +119,7 @@
   	select 
   	<include refid="Base_Column_List"/>
   	from tb_article_brief b
-  	where b.enabled = '1'
+  	where b.status = '0'
   	order by b.update_time desc
   	limit 0,10
   </select>
@@ -131,7 +128,7 @@
   <select id="countArticles4Review" resultType="java.lang.Integer" >
   	select count(1) CNT 
   	from tb_article_brief t 
-  	where t.enabled = '1' 
+  	where t.status = '1' 
   </select>	 
 </mapper>
 

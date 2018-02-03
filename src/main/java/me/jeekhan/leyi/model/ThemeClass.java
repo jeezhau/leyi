@@ -12,14 +12,14 @@ import org.hibernate.validator.constraints.NotEmpty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class ThemeInfo {
-	private List<ThemeInfo> children;
+public class ThemeClass {
+	private List<ThemeClass> children;
 	
     private Long id;
     
-    @NotNull(message="上级主题ID序列：不可为空！")
-    @Size(max=7,min=1,message="上级主题ID序列：最大长度为50个字符！")
-    private String parentId;
+    	//@NotNull(message="上级主题ID序列：不可为空！")
+    @Size(max=80,message="上级主题ID序列：最大长度为80个字符！")
+    private String parentSeq;
     
     @NotNull(message="名称：不可为空！")
     @Size(max=7,message="名称：最大长度为7个字符！")
@@ -42,9 +42,9 @@ public class ThemeInfo {
     @Null
     private String status;
     
-    public  ThemeInfo(){}
+    public  ThemeClass(){}
     
-    public  ThemeInfo(String name){
+    public  ThemeClass(String name){
     		this.name = name;
     }
 
@@ -58,11 +58,11 @@ public class ThemeInfo {
 		} 
     }
 
-	public List<ThemeInfo> getChildren() {
+	public List<ThemeClass> getChildren() {
 		return children;
 	}
 
-	public void setChildren(List<ThemeInfo> children) {
+	public void setChildren(List<ThemeClass> children) {
 		this.children = children;
 	}
 
@@ -74,12 +74,12 @@ public class ThemeInfo {
 		this.id = id;
 	}
 
-	public String getParentId() {
-		return parentId;
+	public String getParentSeq() {
+		return parentSeq;
 	}
 
-	public void setParentId(String parentId) {
-		this.parentId = parentId;
+	public void setParentSeq(String parentSeq) {
+		this.parentSeq = parentSeq;
 	}
 
 	public String getName() {

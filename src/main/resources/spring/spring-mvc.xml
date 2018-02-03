@@ -88,7 +88,7 @@
 
    <!-- 拦截器配置-->
    <mvc:interceptors>
-   	<bean class="me.jeekhan.leyi.interceptor.LogInterceptor"/>
+   	<bean class="me.jeekhan.leyi.interceptor.AccessLogInterceptor"/>
 <!--    	<mvc:interceptor>
    		<mvc:mapping path="/*/theme_mgr/**"/>
    		<mvc:mapping path="/*/review/**"/>

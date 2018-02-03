@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 
 import me.jeekhan.leyi.dto.Operator;
 import me.jeekhan.leyi.model.ArticleBrief;
-import me.jeekhan.leyi.model.ThemeInfo;
+import me.jeekhan.leyi.model.ThemeClass;
 import me.jeekhan.leyi.model.UserFullInfo;
 import me.jeekhan.leyi.service.ArticleService;
 import me.jeekhan.leyi.service.ThemeService;
@@ -45,19 +45,19 @@ public class MyPageAction {
 	 */
 	@RequestMapping(value="/{username}")
 	public String MyIndexPage(@PathVariable("username")String username ,Operator operator,Map<String,Object> map){
-		UserFullInfo userInfo = userService.getUserFullInfo(username);
-		if(userInfo != null){
-			Long id = userInfo.getId();
+		UserFullInfo targetUser = userService.getUserFullInfo(username);
+		if(targetUser != null){
+			Long id = targetUser.getId();
 			boolean isSelf = false;
 			if(operator.getUserId() == id ){ //作者自己
 				isSelf = true;
 			}else{	//访问非自己
-				if(!"A".equals(userInfo.getStatus()) ){ //用户当前未审核通过
+				if(!"A".equals(targetUser.getStatus()) ){ //用户当前未审核通过
 					return "redirect:/";		//跳转至系统首页
 				}
 			}
-			map.put("userInfo", userInfo);
-			List<ThemeInfo> topThemes = themeService.getThemes(id, "/", isSelf);
+			map.put("targetUser", targetUser);
+			List<ThemeClass> topThemes = themeService.getThemes(id, "/", isSelf);
 			map.put("topThemes",topThemes);	//访问目标用户一级主题
 
 			List<ArticleBrief> articleBriefs = articleService.getArticlesAll(isSelf, null, null);
