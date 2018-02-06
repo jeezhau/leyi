@@ -10,29 +10,27 @@ public class EncryptPropertyConfigurer extends PropertyPlaceholderConfigurer{
 	//解密属性
 	@Override
 	public String convertProperty(String propName,String propValue){
-		return propValue;
-//		int flag = this.isEncryptProp(propName);
-//		if(0 == flag){//通用属性
-//			System.out.println(propName + ":" + propValue);
-//			return propValue;
-//		}
-//		//需要区分开开发与生产的属性
-//		String new_propName = env + "." + propName;	//根据环境获取匹配的属性名
-//		String new_propValue = getParam(new_propName);
-//		if(1 == flag) {
-//			System.out.println(propName + ":" + new_propValue);
-//			return new_propValue;
-//		}else if(2 == flag){	//解密处理
-//			String decryptValue = null;
-//			try {
-//				decryptValue = DesUtils.decryptHex(new_propValue);
-//			} catch (Exception e) {
-//				e.printStackTrace();
-//			}
-//			System.out.println(propName + ":" + decryptValue);
-//			return decryptValue;
-//		}
-//		return "";
+		int flag = this.isEncryptProp(propName);
+		if(0 == flag){//通用属性
+			return propValue;
+		}
+		//需要区分开开发与生产的属性
+		String new_propName = env + "." + propName;	//根据环境获取匹配的属性名
+		String new_propValue = getParam(new_propName);
+		if(1 == flag) {
+			System.out.println(propName + ":" + new_propValue);
+			return new_propValue;
+		}else if(2 == flag){	//解密处理
+			String decryptValue = null;
+			try {
+				decryptValue = DesUtils.decryptHex(new_propValue);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			System.out.println(propName + ":" + decryptValue);
+			return decryptValue;
+		}
+		return "";
 	}
 	/**
 	 * 判断参数中属性是否为加密属性

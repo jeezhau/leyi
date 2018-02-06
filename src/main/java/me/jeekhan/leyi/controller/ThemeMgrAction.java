@@ -1,4 +1,4 @@
-package me.jeekhan.leyi.controller.theme;
+package me.jeekhan.leyi.controller;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -22,8 +22,6 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 import me.jeekhan.leyi.common.ErrorCodesPropUtil;
 import me.jeekhan.leyi.common.SysPropUtil;
 import me.jeekhan.leyi.dto.Operator;
-import me.jeekhan.leyi.model.ArticleBrief;
-import me.jeekhan.leyi.model.ReviewInfo;
 import me.jeekhan.leyi.model.ThemeClass;
 import me.jeekhan.leyi.model.UserFullInfo;
 import me.jeekhan.leyi.service.ThemeService;
@@ -219,8 +217,8 @@ public class ThemeMgrAction {
 		}
 		//设置返回路径
 		String redirectUrl = "redirect:/" + operator.getUsername() + "/theme_mgr/";	//跳转至主题管理首页
-		if(!"/".equals(theme.getParentSeq())) {
-			String[] ids = theme.getParentSeq().split("/");
+		if(!"/".equals(tmp.getParentSeq())) {
+			String[] ids = tmp.getParentSeq().split("/");
 			redirectUrl += "theme/" + ids[ids.length-1];//返回上级主题显示页面
 		}
 		return redirectUrl;
@@ -268,7 +266,7 @@ public class ThemeMgrAction {
 	 */
 	@RequestMapping(value="/theme/{themeId}",method=RequestMethod.GET)
 	public String mgrThemes4Theme(@PathVariable("username")String username,@PathVariable("themeId")Long themeId,
-			Map<String,Object> map) throws UnsupportedEncodingException{
+			Map<String,Object> map,HttpSession session) throws UnsupportedEncodingException{
 		Operator operator = (Operator) map.get("operator");
 		//用户权限控制
 		UserFullInfo userInfo = userService.getUserFullInfo(username);
@@ -294,6 +292,9 @@ public class ThemeMgrAction {
 		//当前主题的直接下级主题
 		String themeSeq = ("/".equals(currTheme.getParentSeq())?"":currTheme.getParentSeq()) + "/" + themeId;
 		List<ThemeClass> childrenThemes = themeService.getThemes(userInfo.getId(), themeSeq, true);
+		session.removeAttribute("childrenThemes");
+		session.removeAttribute("themeTreeUp");
+		session.removeAttribute("currTheme");
 		map.put("themeTreeUp",themeTreeUp);
 		map.put("childrenThemes", childrenThemes);
 		map.put("currTheme", currTheme);

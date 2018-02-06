@@ -69,6 +69,15 @@ public interface ArticleService {
 	public List<ArticleBrief> getArticlesByUser(Long userId,boolean isSelf,Map<String,Object> params,PageCond pageCond);
 	
 	/**
+	 * 根据查询条件统计指定用户的所有文章信息
+	 * @param userId		用户ID
+	 * @param isSelf 	是否包含审核中的记录
+	 * @param params		查询条件
+	 * @return
+	 */
+	public int countArticlesByUser(Long userId,boolean isSelf,Map<String,Object> params);
+	
+	/**
 	 * 根据查询条件分页查询显示系统所有用户的所有文章信息，按热度（更新时间，评论数量，关注度的加权值）降序排列;
 	 * @param isSelf 是否包含审核中的记录
 	 * @param params		查询条件
@@ -76,6 +85,14 @@ public interface ArticleService {
 	 * @return
 	 */
 	public List<ArticleBrief> getArticlesAll(boolean isSelf,Map<String,Object> params,PageCond pageCond);
+    
+	/**
+	 * 根据查询条件统计系统所有用户的所有文章信息
+	 * @param isSelf 是否包含审核中的记录
+	 * @param params		查询条件
+	 * @return
+	 */
+	public int countArticlesAll(boolean isSelf,Map<String,Object> params);
     
 	/**
 	 * 取待审核的文章记录
@@ -95,6 +112,6 @@ public interface ArticleService {
 	 * 取待审核文章数量
 	 * @return
 	 */
-	public int get4ReviewArticlesCnt();
+	public int countArticles4Review();
 	
 }

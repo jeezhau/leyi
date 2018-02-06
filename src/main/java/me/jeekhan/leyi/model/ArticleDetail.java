@@ -7,10 +7,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ArticleDetail {
-	@NotNull
     private Long articleId;
     
-	@NotNull
     @Size(max=102400,message="最长为10240个字符")
     private String content;
 

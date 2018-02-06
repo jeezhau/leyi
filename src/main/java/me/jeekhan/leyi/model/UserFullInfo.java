@@ -59,6 +59,10 @@ public class UserFullInfo {
     @Null
     private String status;
     
+    @NotNull
+    @Size(max=50,message="最长为50个字符！")
+    private String inviteCode;
+    
     private String picture;
     
 
@@ -174,6 +178,14 @@ public class UserFullInfo {
         this.picture = picture;
     }
   
+
+	public String getInviteCode() {
+		return inviteCode;
+	}
+
+	public void setInviteCode(String inviteCode) {
+		this.inviteCode = inviteCode;
+	}
 
 	//返回JSON字符串
     public String toString(){

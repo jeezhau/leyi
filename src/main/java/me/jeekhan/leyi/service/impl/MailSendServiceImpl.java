@@ -5,14 +5,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import me.jeekhan.leyi.dao.MailSendInfoMapper;
 import me.jeekhan.leyi.dto.MailSendInfo;
 import me.jeekhan.leyi.service.ArticleService;
 import me.jeekhan.leyi.service.MailSendService;
-import me.jeekhan.leyi.service.ThemeService;
 import me.jeekhan.leyi.service.UserService;
 
 //@Service
@@ -21,8 +17,6 @@ public class MailSendServiceImpl implements MailSendService{
 	private MailSendInfoMapper mailSendInfoMapper;
 	//@Autowired
 	private ArticleService articleService;
-	//@Autowired
-	private ThemeService themeClassService;
 	//@Autowired
 	private UserService userService;
 	
@@ -37,12 +31,11 @@ public class MailSendServiceImpl implements MailSendService{
 	@Override
 	public int add4ReviewWarn(){
 		int userCnt = userService.get4ReviewUsersCnt();
-		int themeCnt = themeClassService.get4ReviewThemesCnt();
-		int articleCnt = articleService.get4ReviewArticlesCnt();
-		if(userCnt>0 || themeCnt>0 || articleCnt>0){
+		int articleCnt = articleService.countArticles4Review();
+		if(userCnt>0 || articleCnt>0){
 			MailSendInfo mailInfo = new MailSendInfo();
 			String subject = getForamtValue("send_review_info_subject",null);;
-			String content = getForamtValue("send_review_info_content",new Object[]{userCnt,themeCnt,articleCnt});;
+			String content = getForamtValue("send_review_info_content",new Object[]{userCnt,articleCnt});;
 			String toAddr = getForamtValue("send_review_info_toAdddr",null);
 			mailInfo.setSubject(subject);
 			mailInfo.setContent(content);

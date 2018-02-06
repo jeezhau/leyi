@@ -11,7 +11,7 @@
   <title>乐学、乐享，快乐生活</title>
   <meta name="description" content="">
   <meta name="author" content="jeekhan">
-  <link rel="shortcut icon" href="/leyi/images/leyi.ico" type="image/x-icon" />
+  <link rel="shortcut icon" href="${contextPath}/images/leyi.ico" type="image/x-icon" />
   <link href="css/font-awesome.min.css" rel="stylesheet">
   <link href="css/templatemo-style.css" rel="stylesheet">
   <link rel="stylesheet" href="http://apps.bdimg.com/libs/bootstrap/3.3.0/css/bootstrap.min.css">  
@@ -31,7 +31,7 @@
       <c:forEach items="${hotUsers}" var="user">
       <div class="thumbnail">
 	    <p align="center"> ${user.username} </p>
-	    <a target="_blank" href="${contextPath}/${user.username}"><img src="${contextPath}/common/showPic/${user.username}/${user.picture }" alt="惹人靓照"></a>
+	    <a target="_blank" href="${contextPath}/${user.username}/user_mgr/detail"><img src="${contextPath}/common/showPic/${user.username}/${user.picture }" alt="惹人靓照"></a>
 	    <div class="caption">
 		  <p>${user.introduce}</p><!-- 个人简介 -->
 	    </div>

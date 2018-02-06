@@ -33,17 +33,17 @@
   <h3 style="text-align:center;margin:20px 0 ">用户注册</h3>
   <div class="row">
 	<form class="form-horizontal" id="registerForm" action="createUser" method ="post" autocomplete="on" enctype="multipart/form-data" role="form" >
-	  <%-- <div class="form-group">
+	  <div class="form-group">
 	    <label for="inviteCode" class="col-xs-2 control-label">邀请码<span style="color:red">*</span></label>
 	    <div class="col-xs-5">
-	      <input type="text" class="form-control" id="inviteCode" name="inviteCode" title="邀请码" value="${param.inviteCode}" required readonly>
+	      <input type="text" class="form-control" id="inviteCode" name="inviteCode" title="邀请码" value="${param.inviteCode}" required>
 	      <c:if test="${not empty inviteCode}">
 	      <div class="alert alert-warning alert-dismissable">${inviteCode}
 	        <button type="button" class="close" data-dismiss="alert"  aria-hidden="true"> &times;</button>
 	      </div>
 	      </c:if>
 	    </div>
-	  </div> --%>
+	  </div>
 	  <div class="form-group">
 	    <label for="username" class="col-xs-2 control-label">用户名<span style="color:red">*</span></label>
 	    <div class="col-xs-5">
@@ -191,6 +191,9 @@
       </div><!-- /.modal-content -->
    </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
+<script type="text/javascript">
+$("#tipModal").modal('show');
+</script>
 </c:if>
 <script>
 $(document).on('ready', function() {

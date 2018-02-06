@@ -4,7 +4,7 @@ import java.text.MessageFormat;
 import java.util.ResourceBundle;
 
 public class ErrorCodesPropUtil {
-private static String prop_file = "props/errorcodes";
+private static String prop_file = "properties/errorcodes";
 	
 	private static  ResourceBundle BUNDLE = ResourceBundle.getBundle(prop_file);
 	

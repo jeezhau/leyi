@@ -7,7 +7,7 @@ import java.util.ResourceBundle;
 public class SysPropUtil {
 	
 
-	private static String prop_file = "props/SysParam";
+	private static String prop_file = "properties/SysParam";
 	
 	private static  ResourceBundle BUNDLE = ResourceBundle.getBundle(prop_file);
 	

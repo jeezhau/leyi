@@ -4,8 +4,6 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 
-import me.jeekhan.leyi.common.PageCond;
-import me.jeekhan.leyi.model.ReviewInfo;
 import me.jeekhan.leyi.model.ThemeClass;
 /**
  *  主题分类服务类
@@ -64,27 +62,5 @@ public interface ThemeService {
 	 */
     int countThemes(@Param("ownerId")Long ownerId,@Param("parentSeq")String parentSeq);
 		
-	/**
-	 * 获取待审核的主题记录
-	 * @param	pageCond	分页信息
-	 * @return
-	 */
-	public List<ThemeClass> getThemes4Review(PageCond pageCond);
-	
-	/**
-	 * 主题审核
-	 * @param themeId   主题ID
-	 * @param result		审核结果:A-通过,R-拒绝
-	 * @param reviewInfo	审核说明
-	 */
-	public Long reviewTheme(Long themeId,String result,ReviewInfo reviewInfo);
-	
-	/**
-	 * 取待审核主题数量
-	 * @return
-	 */
-	public int get4ReviewThemesCnt();
-	
-	
 	
 }

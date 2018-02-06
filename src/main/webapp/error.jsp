@@ -41,7 +41,7 @@
          		</div>
          		<div class="modal-footer">
          			<div style="margin-left:50px">
-             			<button type="button" class="btn btn-default" onclick="window.opener=null;window.close();" >关闭</button>
+             			<button type="button" class="btn btn-default" onclick="window.opener=null;window.open('','_self');window.close();" >关闭</button>
             			</div>
          		</div>
       		</div><!-- /.modal-content -->

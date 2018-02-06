@@ -54,6 +54,19 @@ public class ArticleServiceImpl implements ArticleService {
 	public ArticleDetail getArticleDetail(Long articleId) {
 		return articleDetailMapper.selectByPrimaryKey(articleId);
 	}
+
+	/**
+	 * 根据查询条件统计指定用户的所有文章信息
+	 * @param userId		用户ID
+	 * @param isSelf 	是否包含审核中的记录
+	 * @param params		查询条件
+	 * @return
+	 */
+	@Override
+	public int countArticlesByUser(Long userId,boolean isSelf,Map<String,Object> params){
+		int cnt = articleBriefMapper.countArticlesByUser(userId, isSelf,params);
+		return cnt;
+	}
 	
 	/**
 	 * 根据查询条件分页查询指定用户的所有文章信息，按热度（更新时间，评论数量，关注度的加权值）降序排列;
@@ -73,12 +86,25 @@ public class ArticleServiceImpl implements ArticleService {
 	}
 	
 	/**
+	 * 根据查询条件统计系统所有用户的所有文章信息
+	 * @param isSelf 是否包含审核中的记录
+	 * @param params		查询条件
+	 * @return
+	 */
+	@Override
+	public int countArticlesAll(boolean isSelf,Map<String,Object> params){
+		int cnt = articleBriefMapper.countArticlesAll(isSelf,params);
+		return cnt;
+	}
+	
+	/**
 	 * 根据查询条件分页查询显示系统所有用户的所有文章信息，按热度（更新时间，评论数量，关注度的加权值）降序排列;
 	 * @param isSelf 是否包含审核中的记录
 	 * @param params		查询条件
 	 * @param pageCond	分页条件
 	 * @return
 	 */
+	@Override
 	public List<ArticleBrief> getArticlesAll(boolean isSelf,Map<String,Object> params,PageCond pageCond){
 		if(pageCond == null){
 			pageCond = new PageCond(0);
@@ -107,14 +133,13 @@ public class ArticleServiceImpl implements ArticleService {
 		articleBrief.setStatus("0");		//待审核
 		articleBrief.setUpdateTime(new Date());
 		
-		if(articleBrief.getId() == null){ //新增
+		if(articleBrief.getId() == 0){ //新增
 			articleBriefMapper.insert(articleBrief);
-			Long id = articleBriefMapper.selectLatestRecrod(articleBrief).getId();	//取刚插入的一条文章
-			return id;
+			return articleBrief.getId();	//返回新增文章的ID
 		}else{	//修改
 			//检查是否有该文章
 			ArticleBrief tmp = articleBriefMapper.selectByPrimaryKey(articleBrief.getId());
-			if(!tmp.getOwnerId().equals(articleBrief.getOwnerId())) {
+			if(tmp == null || !tmp.getOwnerId().equals(articleBrief.getOwnerId())) {
 				return ErrorCodes.ARTICLE_ID_ERROR;	//文章ID非法
 			}
 			articleBriefMapper.updateByPrimaryKey(articleBrief);
@@ -204,11 +229,11 @@ public class ArticleServiceImpl implements ArticleService {
 		
 	}
 	/**
-	 * 取待审核文章数量
+	 * 统计待审核文章数量
 	 * @return
 	 */
 	@Override
-	public int get4ReviewArticlesCnt() {
+	public int countArticles4Review() {
 		return articleBriefMapper.countArticles4Review();
 	}
 	

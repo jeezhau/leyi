@@ -92,7 +92,7 @@ public class UserServiceImpl implements UserService{
 			return ErrorCodes.LESS_INFO;
 		}		
 		UserFullInfo oldInfo = userFullInfoMapper.selectByName(userFullInfo.getUsername());
-		if(oldInfo != null && !oldInfo.getId().equals(userFullInfo.getId())){	//系统已有记录
+		if(oldInfo != null && !oldInfo.getId().equals(userFullInfo.getId())){
 			if(oldInfo.getUsername().equals(userFullInfo.getUsername())){	//用户名已被使用
 				return ErrorCodes.USER_USERNAME_USED;
 			}
@@ -100,14 +100,13 @@ public class UserServiceImpl implements UserService{
 				return ErrorCodes.USER_EMAIL_USED;
 			}
 		}
-		
 		userFullInfo.setStatus("0");	//待审核
 		if(userFullInfo.getId() == null){//新增
 			userFullInfo.setPasswd(SunSHAUtils.encodeSHA512Hex(userFullInfo.getPasswd()));
 			userFullInfo.setRegistTime(new Date());
 			userFullInfo.setUpdateTime(new Date());
 			userFullInfoMapper.insert(userFullInfo);
-			Long userId = userFullInfoMapper.selectByName(userFullInfo.getUsername()).getId();
+			Long userId = userFullInfo.getId();	//取新增用户的ID
 //			//修改邀请码的使用状态
 //			String inviteCode = userFullInfo.getInviteCode();
 //			InviteInfo inviteInfo = inviteInfoMapper.selectByPrimaryKey(inviteCode);
@@ -126,6 +125,10 @@ public class UserServiceImpl implements UserService{
 //			inviteInfoMapper.insert(newInvite);
 			return userId;
 		}else{	//修改
+			oldInfo = userFullInfoMapper.selectByPrimaryKey(userFullInfo.getId());
+			if(oldInfo == null) {
+				return ErrorCodes.USER_NO_EXISTS;
+			}
 			userFullInfo.setRegistTime(oldInfo.getRegistTime());
 			userFullInfo.setUpdateTime(new Date());
 			userFullInfoMapper.updateByPrimaryKey(userFullInfo);

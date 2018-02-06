@@ -13,11 +13,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.*;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttributes;
@@ -29,14 +28,14 @@ import me.jeekhan.leyi.dto.Operator;
 import me.jeekhan.leyi.model.UserFullInfo;
 import me.jeekhan.leyi.service.UserService;
 /**
- * 通用处理
+ * 图片通用处理
  * @author Jee Khan
  *
  */
 @Controller
 @RequestMapping("/common")
 @SessionAttributes({"operator"})
-public class CommonAction {
+public class PictureDealAction {
 	@Autowired
 	private UserService userService;
 	/**
@@ -104,7 +103,7 @@ public class CommonAction {
 	 * @throws IOException 
 	 */
 	@RequestMapping(value="/showPic/{username}/{picName}")
-	public void getPersonPicture(@PathVariable("username")String username,@PathVariable("picName")String picName,OutputStream out,HttpServletRequest request,HttpServletResponse response) throws IOException{
+	public void showPicture(@PathVariable("username")String username,@PathVariable("picName")String picName,OutputStream out,HttpServletRequest request,HttpServletResponse response) throws IOException{
 		UserFullInfo userInfo = userService.getUserFullInfo(username);
 		String path = SysPropUtil.getParam("DIR_USER_UPLOAD") + "USER_"+ userInfo.getId().longValue() + "/"; 
 		File dir = new File(path);

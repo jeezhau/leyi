@@ -50,9 +50,9 @@
 			  	 <c:choose>
 			     	<c:when test="${brief.type == 0}">文本</c:when>
 			     	<c:when test="${brief.type == 1}">图册</c:when>
-			     	<c:when test="${brief.type == 2}">视频</c:when>
-			     	<c:when test="${brief.type == 3}">语音</c:when>
-			     	<c:when test="${brief.type == 4}">混合</c:when>
+			     	<c:when test="${brief.type == 2}">多媒体</c:when>
+			     	<c:when test="${brief.type == 3}">混合</c:when>
+			     	<c:when test="${brief.type == 4}">文件资料</c:when>
 			     </c:choose>
 			     </div>
 			  </div>
@@ -98,9 +98,8 @@
 	    </div>
 	  </div> <!-- 文章panel -->
     </div>
-  </div><!-- end of row -->
+</div><!-- end of container -->
   
-</div>
  <c:if test="${not empty param.error}">
 <!-- 错误提示模态框（Modal） -->
 <div class="modal fade " id="tipModal" tabindex="-1" role="dialog" aria-labelledby="tipTitle" aria-hidden="false" data-backdrop="static">

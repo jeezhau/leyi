@@ -1,8 +1,7 @@
-package me.jeekhan.leyi.controller.review;
+package me.jeekhan.leyi.controller;
 
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -10,9 +9,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
 import me.jeekhan.leyi.dto.Operator;
-import me.jeekhan.leyi.service.ArticleService;
-import me.jeekhan.leyi.service.ThemeService;
-import me.jeekhan.leyi.service.UserService;
 /**
  * 信息审核
  * @author Jee Khan

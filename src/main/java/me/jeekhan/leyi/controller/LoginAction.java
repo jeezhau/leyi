@@ -1,4 +1,4 @@
-package me.jeekhan.leyi.controller.user;
+package me.jeekhan.leyi.controller;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.multipart.MultipartFile;
 
-import me.jeekhan.leyi.common.ErrorCodes;
+import me.jeekhan.leyi.common.ErrorCodesPropUtil;
 import me.jeekhan.leyi.common.SysPropUtil;
 import me.jeekhan.leyi.dto.Operator;
 import me.jeekhan.leyi.model.UserFullInfo;
@@ -34,7 +34,7 @@ import me.jeekhan.leyi.service.UserService;
  *
  */
 @Controller
-@SessionAttributes({"operator","userInfo"})
+@SessionAttributes({"operator"})
 public class LoginAction {
 	@Autowired
 	private UserService userService;
@@ -135,12 +135,8 @@ public class LoginAction {
 		userInfo.setPicture(fileName);
 		Long id = userService.saveUser(userInfo);
 		if(id<=0){	//保存失败
-			if(id == ErrorCodes.USER_USERNAME_USED){
-				map.put("username", "该用户名已被使用！");
-			}
-			if(id == ErrorCodes.USER_EMAIL_USED){
-				map.put("email", "该邮箱已被使用！");
-			}
+			String errMsg = ErrorCodesPropUtil.getParam(id.toString());
+			map.put("error", errMsg);
 			return "forward:/register.jsp";	//返回注册页面
 		}
 
@@ -163,10 +159,11 @@ public class LoginAction {
 		}
 		//更新登录操作员信息
 		Operator operator = new Operator();
-		//operator.setLevel(SysPropUtil.getParam("USER_INIT_LVL"));	//设置用户初始级别
+		operator.setLevel(new Integer(SysPropUtil.getParam("USER_INIT_LVL")));	//设置用户初始级别
 		operator.setUserId(id);
 		operator.setUsername(userInfo.getUsername());
 		map.put("operator", operator);
+		
 		return "redirect:/" + userInfo.getUsername();
 	}
 }

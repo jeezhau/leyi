@@ -27,24 +27,17 @@ public interface ArticleBriefMapper {
     Long updateByPrimaryKey(ArticleBrief record);
     
     //根据查询条件统计指定用户的文章数量
-    int countArticlesByUser(@Param("userId") Long userId,@Param("isSelf")boolean isSelf,Map<String,Object>params);
+    int countArticlesByUser(@Param("userId") Long userId,@Param("isSelf")boolean isSelf,@Param("params")Map<String,Object>params);
     
     //根据查询条件获取指定用户的文章信息，以热度排序
-    List<ArticleBrief> selectArticlesByUser(@Param("userId") Long userId,@Param("isSelf")boolean isSelf,Map<String,Object>params,
+    List<ArticleBrief> selectArticlesByUser(@Param("userId") Long userId,@Param("isSelf")boolean isSelf,@Param("params")Map<String,Object>params,
     		@Param("pageCond") PageCond pageCond);
     
     //根据查询条件统计系统所有用户的文章数量 
-    int countArticlesAll(@Param("isSelf")boolean isSelf,Map<String,Object>params );
+    int countArticlesAll(@Param("isSelf")boolean isSelf,@Param("params")Map<String,Object>params );
     
     //根据查询条件获取系统所有用户的文章信息，以热度排序 
-    List<ArticleBrief> selectArticlesAll(@Param("isSelf")boolean isSelf,Map<String,Object>params,@Param("pageCond") PageCond pageCond);
-    
-    //取指定主题下文章数量及文章信息
-    //int countArticlesByTheme(@Param("logicId") String logicId,@Param("isSelf")boolean isSelf,@Param("pageCond") PageCond pageCond);
-    //List<ArticleBrief> selectArticlesByTheme(@Param("logicId") String logicId,@Param("isSelf")boolean isSelf,@Param("pageCond") PageCond pageCond);
-    
-    //根据文章信息从数据库中提取该条记录（最新）
-    ArticleBrief selectLatestRecrod(ArticleBrief record);
+    List<ArticleBrief> selectArticlesAll(@Param("isSelf")boolean isSelf,@Param("params")Map<String,Object>params,@Param("pageCond") PageCond pageCond);
     
     //取系统中最新待审核的记录
     List<ArticleBrief> selectArticles4Review(PageCond pageCond);

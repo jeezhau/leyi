@@ -13,6 +13,7 @@ public class ErrorCodes {
 	//用户信息相关错误码，功能码：100
 	public static Long USER_USERNAME_USED = -100001L;	//用户名已被使用
 	public static Long USER_EMAIL_USED = -100002L;	//邮箱已被使用
+	public static Long USER_NO_EXISTS = -100003L;		//系统中无该用户
 
 	//主题信息相关错误码，功能码：101
 	public static Long THEME_EXISTS_SAME = -101001L;			//已存在同名同级主题

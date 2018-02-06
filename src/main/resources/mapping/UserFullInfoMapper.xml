@@ -13,14 +13,15 @@
     <result column="profession" property="profession" jdbcType="VARCHAR" />
     <result column="introduce" property="introduce" jdbcType="VARCHAR" />
     <result column="picture" property="picture" jdbcType="VARCHAR" />
+    <result column="invite_code" property="inviteCode" jdbcType="VARCHAR"/>
     <result column="regist_time" property="registTime" jdbcType="TIMESTAMP" />
     <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
     <result column="status" property="status" jdbcType="CHAR" />
   </resultMap>
 
   <sql id="Base_Column_List" >
-    id, username, email, birthday, sex, passwd, city, favourite, profession, introduce, picture, regist_time, 
-    update_time, status
+    id, username, email, birthday, sex, passwd, city, favourite, profession, introduce, picture, invite_code,
+    regist_time, update_time, status
   </sql>
 
 
@@ -39,27 +40,27 @@
     where username = #{userName,jdbcType=VARCHAR} or email = #{userName,jdbcType=VARCHAR}
   </select>
   
-  <!--更新用户更 状态：0-正常，1-待审核，R-拒绝,D-删除 -->
+  <!--更新用户更 状态：A-正常，0-待审核，R-拒绝,D-删除 -->
   <update id="updateStatus" parameterType="map" >
     update tb_user_full_info
-    set enabled = #{status,jdbcType=CHAR} 
+    set status = #{status,jdbcType=CHAR} 
     where id = #{id,jdbcType=INTEGER}
   </update>
   
-  <insert id="insert" parameterType="me.jeekhan.leyi.model.UserFullInfo" >
-    insert into tb_user_full_info (id, username, email, 
+  <insert id="insert" parameterType="me.jeekhan.leyi.model.UserFullInfo" keyProperty="id" useGeneratedKeys="true">
+    insert into tb_user_full_info (username, email, 
       birthday, sex, passwd, city, 
       favourite, profession, introduce, 
       regist_time, update_time, status, 
-      picture)
-    values (#{id,jdbcType=INTEGER}, #{username,jdbcType=VARCHAR}, #{email,jdbcType=VARCHAR}, 
+      picture,invite_code)
+    values (#{username,jdbcType=VARCHAR}, #{email,jdbcType=VARCHAR}, 
       #{birthday,jdbcType=DATE}, #{sex,jdbcType=CHAR}, #{passwd,jdbcType=VARCHAR}, #{city,jdbcType=VARCHAR}, 
       #{favourite,jdbcType=VARCHAR}, #{profession,jdbcType=VARCHAR}, #{introduce,jdbcType=VARCHAR}, 
       #{registTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}, #{status,jdbcType=CHAR}, 
-      #{picture,jdbcType=VARCHAR})
+      #{picture,jdbcType=VARCHAR},#{inviteCode.jdbcType=VARCHAR})
   </insert>
   
-  <update id="updateByPrimaryKeySelective" parameterType="me.jeekhan.leyi.model.UserFullInfo" >
+  <update id="updateByPrimaryKey" parameterType="me.jeekhan.leyi.model.UserFullInfo" >
     update tb_user_full_info
     <set >
       <if test="username != null" >
@@ -89,37 +90,13 @@
       <if test="introduce != null" >
         introduce = #{introduce,jdbcType=VARCHAR},
       </if>
-      <if test="registTime != null" >
-        regist_time = #{registTime,jdbcType=TIMESTAMP},
-      </if>
       <if test="updateTime != null" >
         update_time = #{updateTime,jdbcType=TIMESTAMP},
-      </if>
-      <if test="enabled != null" >
-        enabled = #{enabled,jdbcType=CHAR},
       </if>
       <if test="picture != null" >
         picture = #{picture,jdbcType=VARCHAR},
       </if>    
     </set>
-    where id = #{id,jdbcType=INTEGER}
-  </update>
-
-  <update id="updateByPrimaryKey" parameterType="me.jeekhan.leyi.model.UserFullInfo" >
-    update tb_user_full_info
-    set username = #{username,jdbcType=VARCHAR},
-      email = #{email,jdbcType=VARCHAR},
-      birthday = #{birthday,jdbcType=DATE},
-      sex = #{sex,jdbcType=CHAR},
-      passwd = #{passwd,jdbcType=VARCHAR},
-      city = #{city,jdbcType=VARCHAR},
-      favourite = #{favourite,jdbcType=VARCHAR},
-      profession = #{profession,jdbcType=VARCHAR},
-      introduce = #{introduce,jdbcType=VARCHAR},
-      picture = #{picture,jdbcType=VARCHAR},
-      regist_time = #{registTime,jdbcType=TIMESTAMP},
-      update_time = #{updateTime,jdbcType=TIMESTAMP},
-      enabled = #{enabled,jdbcType=CHAR}
     where id = #{id,jdbcType=INTEGER}
   </update>
   

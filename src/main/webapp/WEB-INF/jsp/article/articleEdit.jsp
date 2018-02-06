@@ -9,7 +9,7 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">  
-  <title>文章资料编辑</title>
+  <title>${operator.username}—文章资料编辑</title>
   <meta name="description" content="">
   <meta name="author" content="jeekhan">
   <link rel="shortcut icon" href="${contextPath}/images${contextPath}.ico" type="image/x-icon" />
@@ -27,7 +27,7 @@
   <jk:topSysMenuBar></jk:topSysMenuBar>
   
   <div class="row">
-	<form class="form-horizontal" id="articleForm" action="" method ="post" role="form" enctype="multipart/form-data" role="form">
+	<form class="form-horizontal" id="articleForm" action="${contextPath}/${operator.username}/article_mgr/save" method ="post" role="form" enctype="multipart/form-data" role="form">
 	  <!-- 系统错误显示 -->
 	  <c:if test="${not empty error}">
       <div class="alert alert-warning alert-dismissable">${error}
@@ -118,9 +118,6 @@
           <c:if test="${not empty detail.content }">
           <div id="hidden-Content" style="display:none">${detail.content }</div>
           </c:if>
-          <c:if test="${not empty param.content }">
-          <div id="hidden-Content" style="display:none">${param.content }</div>
-          </c:if>
           <textarea class="form-control" id="content" name="content" maxLength=10100 ></textarea>
           <c:if test="${not empty valid.content}">
 	      <div class="alert alert-warning alert-dismissable">${valid.content}
@@ -141,31 +138,22 @@
   
   <jk:copyRight></jk:copyRight>
   
-</div>
+</div><!-- end of container -->
 
 <script>
 $(function(){ 
-	var articleId = '${brief.id}';
-	CKEDITOR.replace( 'content' );
-	if(articleId){
-		var content = CKEDITOR.instances['content'];
-		content.setData($('#hidden-Content').html()); 
-		$('#source').val('${brief.source}');
-		$('#type').val('${brief.type}');
-	}
+	//页面初始化
+	var articleId = '${brief.id}';	//当前的文章ID
+	CKEDITOR.replace( 'content' );	//修改 #content 的显示方式为 CKEDITOR
+	var contentObj = CKEDITOR.instances['content'];
+	contentObj.setData($('#hidden-Content').html()); 
+	$('#source').val('${brief.source}');
+	$('#type').val('${brief.type}');
 	
-	$("#save").click(function(){
-		if(articleId){
-			$("#articleForm").attr('action','${contextPath}/${operator.username}/article_mgr/update');
-		}else{
-			$("#articleForm").attr('action','${contextPath}/${operator.username}/article_mgr/add');
-		}
-		return true;
-	});
 	$("#reset").click(function(){
-		if(articleId){
+		if(articleId){//修改
 			window.location.reload();
-		}else{
+		}else{//新增
 			$("#articleForm").reset();
 		}
 	});

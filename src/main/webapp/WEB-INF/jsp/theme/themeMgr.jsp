@@ -145,11 +145,11 @@ function updCurr(){
 	$("#themeId").val(themeId);
 	$("#parentSeq").val('');
 	$("#themeName").attr("readOnly",false);
-	$("#themeName").val('${currTheme.name}');
+	$("#themeName").val($('#hiddenCurrName').val());
 	$("#keywords").attr("readOnly",false);
-	$("#keywords").val('${currTheme.keywords}');
+	$("#keywords").val($('#hiddenCurrKeywords').val());
 	$("#themeContent").attr("readOnly",false);
-	$("#themeContent").val('${currTheme.content}');	
+	$("#themeContent").val($('#hiddenCurrContent').val());	
 	$("#save").show();
 	$("#reset").show();
 	$("#delete").hide();
@@ -169,11 +169,11 @@ $("#delCurr").click(function(){
 	$("#themeId").val(themeId);
 	$("#parentSeq").val('');
 	$("#themeName").attr("readOnly",true);
-	$("#themeName").val('${currTheme.name}');
+	$("#themeName").val($('#hiddenCurrName').val());
 	$("#keywords").attr("readOnly",true);
-	$("#keywords").val('${currTheme.keywords}');
+	$("#keywords").val($('#hiddenCurrKeywords').val());
 	$("#themeContent").attr("readOnly",true);
-	$("#themeContent").val('${currTheme.content}');
+	$("#themeContent").val($('#hiddenCurrContent').val());
 	$("#delete").show();
 	$("#save").hide();
 	$("#reset").hide();
@@ -196,11 +196,11 @@ $("#save").click(function(){
 $("#reset").click(function(){
 	if($("#themeId").val()){
 		$("#themeName").attr("readOnly",false);
-		$("#themeName").val('${currTheme.name}');
+		$("#themeName").val($("#hiddenCurrName").val());
 		$("#keywords").attr("readOnly",false);
-		$("#keywords").val('${currTheme.keywords}');
+		$("#keywords").val($("#hiddenCurrKeywords").val());
 		$("#themeContent").attr("readOnly",false);
-		$("#themeContent").val('${currTheme.content}');
+		$("#themeContent").val($("#hiddenCurrContent").val());
 	}else{
 		$("#themeName").attr("readOnly",false);
 		$("#themeName").val('');
@@ -213,7 +213,17 @@ $("#reset").click(function(){
 	
 
 </script>
+<%--缓存当前主题 --%>
+<c:if test="${currTheme.id != null}">
+<div style="visibility:hidden">
+	<input type ="hidden" id="hiddenCurrName" value="${currTheme.name}">
+	<input type ="hidden" id="hiddenCurrKeywords" value="${currTheme.keywords}">
+	<input type ="hidden" id="hiddenCurrContent" value="${currTheme.content}">
+</div>
+</c:if>
 
+<div>
+</div>
  <c:if test="${not empty param.error or not empty error}">
  <!-- 错误提示模态框（Modal） -->
  <div class="modal fade " id="tipModal" tabindex="-1" role="dialog" aria-labelledby="tipTitle" aria-hidden="false" data-backdrop="static">
@@ -234,6 +244,14 @@ $("#reset").click(function(){
      </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
+<%--缓存刚提交的数据 --%>
+<c:if test="${currTheme.id != null}">
+<div style="visibility:hidden">
+	<input type ="hidden" id="hiddenErrName" value="${theme.name}">
+	<input type ="hidden" id="hiddenErrKeywords" value="${theme.keywords}">
+	<input type ="hidden" id="hiddenErrContent" value="${theme.content}">
+</div>
+</c:if>
 <script>
 $("#tipModal").modal('show');
 if('${mode}' == "add"){
@@ -244,9 +262,19 @@ if('${mode}' == "add"){
 	startNew();
 	$("#themeId").val('');
 	$("#parentSeq").val(themeSeq);
-	$("#themeName").val('${theme.name}');
-	$("#keywords").val('${theme.keywords}');
-	$("#themeContent").val('${theme.content}');
+	$("#themeName").val($("#hiddenErrName").val());
+	$("#keywords").val($("#hiddenErrKeywords").val());
+	$("#themeContent").val($("#hiddenErrContnet").val());
+	$("#save").show();
+	$("#reset").show();
+}
+if("${mode}" == "update"){
+	updCurr();
+	$("#themeId").val(themeId);
+	$("#parentSeq").val('');
+	$("#themeName").val($("#hiddenErrName").val());
+	$("#keywords").val($("#hiddenErrKeywords").val());
+	$("#themeContent").val($("#hiddenErrContnet").val());
 	$("#save").show();
 	$("#reset").show();
 }

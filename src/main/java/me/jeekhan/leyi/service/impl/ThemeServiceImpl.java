@@ -9,11 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import me.jeekhan.leyi.common.ErrorCodes;
-import me.jeekhan.leyi.common.PageCond;
 import me.jeekhan.leyi.dao.ArticleBriefMapper;
-import me.jeekhan.leyi.dao.ReviewInfoMapper;
 import me.jeekhan.leyi.dao.ThemeClassMapper;
-import me.jeekhan.leyi.model.ReviewInfo;
 import me.jeekhan.leyi.model.ThemeClass;
 import me.jeekhan.leyi.service.ThemeService;
 
@@ -26,8 +23,6 @@ import me.jeekhan.leyi.service.ThemeService;
 public class ThemeServiceImpl implements ThemeService {
 	@Autowired
 	private ThemeClassMapper themeClassMapper;
-	@Autowired
-	private ReviewInfoMapper reviewInfoMapper;
 	@Autowired
 	private ArticleBriefMapper articleBriefMapper;
 	
@@ -65,7 +60,7 @@ public class ThemeServiceImpl implements ThemeService {
 		}		
 		
 		if(theme.getId() == null){//新增
-			if(!"/".equals(theme.getParentSeq())) {//下级主题验证
+			if(!"/".equals(theme.getParentSeq())) {//上级主题验证
 				String[] idSeq = theme.getParentSeq().split("/");
 				ThemeClass tmp = themeClassMapper.selectByPrimaryKey(new Long(idSeq[idSeq.length-1]));
 				if(tmp == null) {
@@ -73,8 +68,7 @@ public class ThemeServiceImpl implements ThemeService {
 				}
 			}
 			themeClassMapper.insert(theme);
-			ThemeClass lastest = themeClassMapper.selectTheme(theme.getName(),theme.getParentSeq(),theme.getOwnerId());
-			return lastest.getId();
+			return theme.getId();	//返回新增主题ID
 		}else{	//修改
 			ThemeClass tmp = themeClassMapper.selectByPrimaryKey(theme.getId());
 			if(!theme.getOwnerId().equals(tmp.getOwnerId())) {
@@ -95,11 +89,13 @@ public class ThemeServiceImpl implements ThemeService {
 	@Override
 	public Long deleteTheme(Long themeId) {
 		ThemeClass theme = themeClassMapper.selectByPrimaryKey(themeId);
-		int cntChildren = themeClassMapper.countUserThemes(theme.getOwnerId(), theme.getParentSeq()+"/"+theme.getId(),true);
+		String themeSeq = ("/".equals(theme.getParentSeq())?"":theme.getParentSeq()) + "/" + themeId;
+		int cntChildren = themeClassMapper.countUserThemes(theme.getOwnerId(), themeSeq,true);
 		if(cntChildren>0) {
 			return ErrorCodes.THEME_HAS_CHILDREN;
 		}
 		Map<String,Object> params = new HashMap<String,Object>();
+		params.put("theme_id", themeId);
 		int cntRelAraticles = articleBriefMapper.countArticlesByUser(theme.getOwnerId(), true, params);
 		if(cntRelAraticles>0) {
 			return ErrorCodes.THEME_HAS_REL_ARTICLES;
@@ -141,43 +137,6 @@ public class ThemeServiceImpl implements ThemeService {
 		return themeClassMapper.selectUserThemes(ownerId, parentSeq,isSelf);
 	}
 	
-	/**
-	 * 获取待审核的主题记录
-	 * @return
-	 */
-	@Override
-	public List<ThemeClass> getThemes4Review(PageCond pageCond){
-		return themeClassMapper.selectThemes4Review(pageCond);
-	}
-	
-	/**
-	 * 主题审核
-	 * @param themeId   主题ID
-	 * @param result	审核结果:A-通过,R-拒绝
-	 * @param reviewInfo	审核说明
-	 * @return	主题ID
-	 */
-	@Override
-	public Long reviewTheme(Long themeId,String result,ReviewInfo reviewInfo){
-		String themeInfo = themeClassMapper.selectByPrimaryKey(themeId).toString();
-		reviewInfo.setObjName("tb_theme_info");
-		reviewInfo.setKeyId(themeId);
-		reviewInfo.setOriginalInfo(themeInfo);
-		reviewInfo.setResult(result);
-		reviewInfo.setReviewTime(new Date());
-		reviewInfoMapper.insert(reviewInfo);
-		
-		return themeClassMapper.updateStatus(themeId, result);
-	}
-	
-	/**
-	 * 取待审核主题数量
-	 * @return
-	 */
-	@Override
-	public int get4ReviewThemesCnt() {
-		return themeClassMapper.countThemes4Review();
-	}
 
 	/**
 	 * 统计同级指定层级的主题数量

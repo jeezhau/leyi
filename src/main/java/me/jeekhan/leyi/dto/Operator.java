@@ -1,7 +1,6 @@
 package me.jeekhan.leyi.dto;
 
 import java.util.List;
-import java.util.Map;
 
 import me.jeekhan.leyi.model.ThemeClass;
 /**

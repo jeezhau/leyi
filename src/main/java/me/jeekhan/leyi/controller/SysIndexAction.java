@@ -1,4 +1,4 @@
-package me.jeekhan.leyi.controller.index;
+package me.jeekhan.leyi.controller;
 
 import java.util.List;
 import java.util.Map;
@@ -41,7 +41,7 @@ public class SysIndexAction {
 		List<ArticleBrief> hotArticles = articleService.getArticlesAll(false, null, null);
 		map.put("hotUsers", hotUsers);
 		map.put("hotArticles", hotArticles);
-		return "index";
+		return "sysIndex";
 	}
 
 }

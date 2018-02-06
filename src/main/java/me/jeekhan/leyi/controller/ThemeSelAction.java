@@ -1,4 +1,4 @@
-package me.jeekhan.leyi.controller.theme;
+package me.jeekhan.leyi.controller;
 
 /**
  * 主题查询控制类

@@ -41,9 +41,9 @@
   </update>
   
   <!-- 新插入一条主题信息-->
-  <insert id="insert" parameterType="me.jeekhan.leyi.model.ThemeClass" keyProperty="id" >
-    insert into tb_theme_class (id, parent_seq, name, keywords, content, update_time, owner_id, status)
-    values (#{id,jdbcType=INTEGER}, #{parentSeq,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, 
+  <insert id="insert" parameterType="me.jeekhan.leyi.model.ThemeClass" keyProperty="id" useGeneratedKeys="true">
+    insert into tb_theme_class (parent_seq, name, keywords, content, update_time, owner_id, status)
+    values (#{parentSeq,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, 
       #{keywords,jdbcType=VARCHAR}, #{content,jdbcType=VARCHAR}, #{updateTime,jdbcType=TIMESTAMP}, 
       #{ownerId,jdbcType=INTEGER}, #{status,jdbcType=CHAR})
   </insert>

@@ -45,8 +45,8 @@
 		<property name="dataSource" ref="dataSource" />
 		<!-- 自动扫描mapping.xml文件 --> 
 		<property name="mapperLocations"  value="classpath:mapping/*.xml"></property>
-		<!--mybatis配置
-		<property name="configLocation" value="classpath:MyBatis-Configuration.xml"></property> -->
+		<!--mybatis配置-->
+		<property name="configLocation" value="classpath:spring/MybatisConfig.xml"></property>
 	</bean>  
 
 	<!-- DAO组件注册--> 

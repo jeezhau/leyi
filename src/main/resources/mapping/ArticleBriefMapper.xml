@@ -34,12 +34,12 @@
   </delete>
   
   <!-- 新插入一条文章简介-->
-  <insert id="insert" parameterType="me.jeekhan.leyi.model.ArticleBrief" >
-    insert into tb_article_brief (id, name, keywords, 
+  <insert id="insert" parameterType="me.jeekhan.leyi.model.ArticleBrief" keyProperty="id" useGeneratedKeys="true"> 
+    insert into tb_article_brief (name, keywords, 
       brief, source, theme_id, 
       type, update_time, owner_id, 
       status)
-    values (#{id,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR}, #{keywords,jdbcType=VARCHAR}, 
+    values (#{name,jdbcType=VARCHAR}, #{keywords,jdbcType=VARCHAR}, 
       #{brief,jdbcType=VARCHAR}, #{source,jdbcType=CHAR}, #{themeId,jdbcType=INTEGER}, 
       #{type,jdbcType=CHAR}, #{updateTime,jdbcType=TIMESTAMP}, #{ownerId,jdbcType=INTEGER}, 
       #{status,jdbcType=CHAR})
@@ -60,75 +60,149 @@
     where id = #{id,jdbcType=INTEGER}
   </update>
   
-  <!--取指定用户的所有（分页）的文章 -->
+  <!--取指定用户的所有（分页）的文章：userId，isSelf，params，pageCond -->
   <select id="selectArticlesByUser" parameterType="map" resultMap="BaseResultMap">
   	select 
   	<include refid="Base_Column_List"/>
   	from tb_article_brief b
   	where b.status in ('A'<if test="isSelf" >,'0','R'</if>)
   	 and owner_id = #{userId}
-  	order by (UNIX_TIMESTAMP(b.update_time)/3600/24 + (select count(1) from tb_comments c where c.article_id = b.id and c.status=0)) desc
+  	<if test="params != null"> 
+  	 <if test="params.name != null">
+  	 and name like #{params.name}
+  	 </if>
+  	 <if test ="params.keywords != null">
+  	 and keywords like #{params.keywords}
+  	 </if>
+  	 <if test="params.source != null">
+  	 and source = #{params.source}
+  	 </if>
+  	 <if test="params.themeId != null">
+  	 and theme_id = #{params.themeId} 
+  	 </if>
+  	 <if test="params.type != null">
+  	 and type = #{params.type}
+  	 </if>
+  	 <if test="params.beginTime != null">
+  	 and update_time &gt;= #{params.beginTime}
+  	 </if>
+  	 <if test="params.endTime != null"> 
+  	 and update_time &lt;= #{params.endTime} 
+  	 </if> 
+  	</if>  	 
+  	order by update_time desc 
   	limit #{pageCond.begin},#{pageCond.pageSize}
   </select>
   
-  <!--取指定用户的所有的文章数量 -->
+  <!--取指定用户的所有的文章数量：userId，isSelf，params -->
   <select id="countArticlesByUser" parameterType="map" resultType="java.lang.Integer" >
   	select count(1) CNT
   	from tb_article_brief b
   	where b.status in ('A'<if test="isSelf" >,'0','R'</if>)
   	 and owner_id = #{userId}
+  	<if test="params != null"> 
+  	 <if test="params.name != null">
+  	 and name like #{params.name}
+  	 </if>
+  	 <if test ="params.keywords != null">
+  	 and keywords like #{params.keywords}
+  	 </if>
+  	 <if test="params.source != null">
+  	 and source = #{params.source}
+  	 </if>
+  	 <if test="params.themeId != null">
+  	 and theme_id = #{params.themeId} 
+  	 </if>
+  	 <if test="params.type != null">
+  	 and type = #{params.type}
+  	 </if>
+  	 <if test="params.beginTime != null">
+  	 and update_time &gt;= #{params.beginTime}
+  	 </if>
+  	 <if test="params.endTime != null"> 
+  	 and update_time &lt;= #{params.endTime} 
+  	 </if> 
+  	</if> 
   </select> 
-  
-    <!--取指定主题下的所有文章简介数量 -->
-  <select id="countArticlesByTheme" parameterType="map" resultType="java.lang.Integer">
-  	select count(1) CNT
-  	from tb_article_brief b
-  	where b.status in ('A'<if test="isSelf" >,'0','R'</if>)
-  	and b.theme_id in (select t1.id from tb_theme_class t1 where t1.logic_id like CONCAT(#{logicId},'%')) 
-  </select>
 
-  <!-- 统计系统文章数量 -->
+  <!-- 统计系统文章数量：isSelf，params -->
   <select id="countArticlesAll" parameterType="map" resultMap="BaseResultMap">
   	select count(1) CNT
   	from tb_article_brief b
   	where b.status in ('A'<if test="isSelf" >,'0','R'</if>)
-  	
-  </select>
+  	<if test="params != null"> 
+  	 <if test="params.name != null">
+  	 and name like #{params.name}
+  	 </if>
+  	 <if test ="params.keywords != null">
+  	 and keywords like #{params.keywords}
+  	 </if>
+  	 <if test="params.source != null">
+  	 and source = #{params.source}
+  	 </if>
+  	 <if test="params.themeId != null">
+  	 and theme_id = #{params.themeId} 
+  	 </if>
+  	 <if test="params.type != null">
+  	 and type = #{params.type}
+  	 </if>
+  	 <if test="params.beginTime != null">
+  	 and update_time &gt;= #{params.beginTime}
+  	 </if>
+  	 <if test="params.endTime != null"> 
+  	 and update_time &lt;= #{params.endTime} 
+  	 </if> 
+  	</if> 
+</select>
     
-  <!-- 获取系统所有文章， -->
+  <!-- 获取系统所有文章：isSelf，params，pageCond -->
   <select id="selectArticlesAll" parameterType="map" resultMap="BaseResultMap">
   	select 
   	<include refid="Base_Column_List"/>
   	from tb_article_brief b
   	where b.status in ('A'<if test="isSelf" >,'0','R'</if>)
-  	
+  	<if test="params != null"> 
+  	 <if test="params.name != null">
+  	 and name like #{params.name}
+  	 </if>
+  	 <if test ="params.keywords != null">
+  	 and keywords like #{params.keywords}
+  	 </if>
+  	 <if test="params.source != null">
+  	 and source = #{params.source}
+  	 </if>
+  	 <if test="params.themeId != null">
+  	 and theme_id = #{params.themeId} 
+  	 </if>
+  	 <if test="params.type != null">
+  	 and type = #{params.type}
+  	 </if>
+  	 <if test="params.beginTime != null">
+  	 and update_time &gt;= #{params.beginTime}
+  	 </if>
+  	 <if test="params.endTime != null"> 
+  	 and update_time &lt;= #{params.endTime} 
+  	 </if> 
+  	</if> 
+  	order by update_time desc 
   	limit #{pageCond.begin},#{pageCond.pageSize}
   </select>
   
-  <!--取指定主题下指定名称最新添加的文章简介 -->
-  <select id="selectLatestRecrod" parameterType="me.jeekhan.leyi.model.ArticleBrief"  resultMap="BaseResultMap">
-  	select 
-  	<include refid="Base_Column_List"/>
-  	from tb_article_brief 
-  	where id = ( select max(id) from tb_article_brief b 
-		where b.theme_id = #{themeId} and b.`name` = #{name} and b.keywords = #{keywords} and b.source=#{source} and b.type=#{type} and b.owner_id=#{ownerId})
-  </select> 
-  
-  <!-- 取待审核的最新10条文章简介 -->
+  <!-- 取待审核的文章简介：pageCond -->
   <select id="selectArticles4Review" parameterType="map" resultMap="BaseResultMap">
   	select 
   	<include refid="Base_Column_List"/>
   	from tb_article_brief b
   	where b.status = '0'
   	order by b.update_time desc
-  	limit 0,10
+  	limit #{pageCond.begin},#{pageCond.pageSize}
   </select>
   
   <!-- 统计待审核文章数量-->
   <select id="countArticles4Review" resultType="java.lang.Integer" >
   	select count(1) CNT 
   	from tb_article_brief t 
-  	where t.status = '1' 
+  	where t.status = '0' 
   </select>	 
 </mapper>
 

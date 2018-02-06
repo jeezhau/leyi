@@ -1,4 +1,4 @@
-package me.jeekhan.leyi.controller.user;
+package me.jeekhan.leyi.controller;
 
 /**
  * 用户信息查询类
