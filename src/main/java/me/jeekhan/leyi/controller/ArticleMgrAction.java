@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mysql.cj.core.util.StringUtils;
 
 import me.jeekhan.leyi.common.ErrorCodesPropUtil;
 import me.jeekhan.leyi.common.PageCond;
@@ -32,10 +33,12 @@ import me.jeekhan.leyi.common.SysPropUtil;
 import me.jeekhan.leyi.dto.Operator;
 import me.jeekhan.leyi.model.ArticleBrief;
 import me.jeekhan.leyi.model.ArticleDetail;
-import me.jeekhan.leyi.model.ReviewInfo;
+import me.jeekhan.leyi.model.ReviewApply;
+import me.jeekhan.leyi.model.ReviewLog;
 import me.jeekhan.leyi.model.ThemeClass;
 import me.jeekhan.leyi.model.UserFullInfo;
 import me.jeekhan.leyi.service.ArticleService;
+import me.jeekhan.leyi.service.ReviewCheck;
 import me.jeekhan.leyi.service.ThemeService;
 import me.jeekhan.leyi.service.UserService;
 /**
@@ -44,8 +47,7 @@ import me.jeekhan.leyi.service.UserService;
  * 2、文章信息的展示：/(detail|review|edit)//{articleId}；
  * 3、文章信息的修改保存：/update/{articleId}；
  * 4、用户删除自己的文章：/delete/{articleId}；
- * 5、管理员审核文章通过：/accept/{articleId}；
- * 6、管理员审核文章拒绝：/refuse/{articleId}；
+ * 5、管理员审核文章：/approval/{articleId}；
  * @author Jee Khan
  *
  */
@@ -59,6 +61,8 @@ public class ArticleMgrAction {
 	private ThemeService themeService;
 	@Autowired
 	private UserService userService;
+	@Autowired
+	private ReviewCheck reviewCheck;
 	
 	private static String REDIRECT_SYS_ERROR_PAGE = "redirect:" + SysPropUtil.getParam("SYSTEM_ERROR_PAGE");	//跳转至错误页面
 	/**
@@ -255,76 +259,21 @@ public class ArticleMgrAction {
 	}
 	
 	/**
-	 * 文章审核：通过
+	 * 文章审核
 	 * 【权限】
 	 * 	1、仅登录的管理员可执行该操作；
 	 * 【功能说明】
 	 *  1、判断审核的文章是否存在；
-	 *  2、执行审核通过
-	 * 【输入输出】
-	 * @param username	目标用户名称
-	 * @param articleId	待审核文章ID
-	 * @param remark		审批意见
-	 * @param operator
-	 * @return
-	 * @throws UnsupportedEncodingException 
-	 */
-	@RequestMapping(value="/accept/{articleId}",method=RequestMethod.POST)
-	public String accept(@PathVariable("username")String username,@PathVariable("articleId")Long articleId,String remark,
-			@ModelAttribute("operator")Operator operator,Map<String,Object> map) throws UnsupportedEncodingException{
-		String forwardUrl = "forward:/"+operator.getUsername()+"/article_mgr/review/" + articleId;	//转发至文章审核页面
-		//目标用户检查
-		UserFullInfo targetUser = userService.getUserFullInfo(username);
-		if(targetUser == null) {//用户不存在
-			return REDIRECT_SYS_ERROR_PAGE + "?error=" + URLEncoder.encode("操作错误：用户【"+ username +"】不存在！","utf-8");	//跳转至系统错误页面
-		}
-		if(operator == null || operator.getLevel() < 9){ //无权限
-			return REDIRECT_SYS_ERROR_PAGE + "?error=" + URLEncoder.encode("权限错误：您未登录或无权限执行该操作！","utf-8");
-		}
-		//数据合规检查
-		if(articleId == null){ //文章为空
-			map.put("valid.articleId", "文章ID：不可为空！");
-			return forwardUrl;
-		}
-		if(remark !=null && remark.length()>600){
-			map.put("valid.remark", "审批意见：不可超过600个字符！");
-			return forwardUrl ;	//返回文章审核页面
-		}
-		//文章检查
-		ArticleBrief brief = articleService.getArticleBref(articleId);
-		if(brief == null){ //无该文章
-			return REDIRECT_SYS_ERROR_PAGE + "?error=" + URLEncoder.encode("操作错误：系统中无该文章信息！","utf-8");
-		}
-		if(!"0".equals(brief.getStatus())) {
-			return REDIRECT_SYS_ERROR_PAGE + "?error=" + URLEncoder.encode("操作错误：该文章未处于待审核状态！","utf-8");
-		}
-		
-		ReviewInfo reviewInfo = new ReviewInfo();
-		reviewInfo.setReviewInfo(remark);
-		reviewInfo.setReviewOpr(operator.getUserId());
-		Long id = articleService.reviewArticle(articleId,"A",reviewInfo);
-		if(id <= 0){//审批失败
-			return "redirect:/"+operator.getUsername()+ "/review/" + "?error=" + ErrorCodesPropUtil.getParam(id.toString());	//添加审批错误信息
-		}else {
-			return "redirect:/"+operator.getUsername()+ "/review/";	//跳转至审核页面
-		}
-	}
-	
-	/**
-	 * 文章审核：拒绝
-	 * 【权限】
-	 * 	1、仅登录的管理员可执行该操作；
-	 * 【功能说明】
-	 *  1、判断审核的文章是否存在；
-	 *  2、执行审核拒绝
+	 *  2、判断审核申请是否存在；
 	 * @param articleId
 	 * @param remark
 	 * @param operator
 	 * @return
 	 * @throws UnsupportedEncodingException 
 	 */
-	@RequestMapping(value="/refuse/{articleId}",method=RequestMethod.POST)
-	public String refuse(@PathVariable("username")String username,@PathVariable("articleId")Long articleId,String remark,
+	@RequestMapping(value="/approval/{articleId}",method=RequestMethod.POST)
+	public String approvalArticle(@PathVariable("username")String username,@PathVariable("articleId")Long articleId,
+			@Valid ReviewLog reviewLog,BindingResult result,
 			@ModelAttribute("operator")Operator operator,Map<String,Object> map) throws UnsupportedEncodingException{
 		String forwardUrl = "forward:/"+operator.getUsername()+"/article_mgr/review/" + articleId;	//转发至文章审核页面
 		//目标用户检查
@@ -335,18 +284,19 @@ public class ArticleMgrAction {
 		if(operator == null || operator.getLevel() < 9){ //无权限
 			return REDIRECT_SYS_ERROR_PAGE + "?error=" + URLEncoder.encode("权限错误：您未登录或无权限执行该操作！","utf-8");
 		}
-		//数据合规检查
-		if(articleId == null ){ //文章Id为空
-			map.put("valid.articleId", "文章ID：不可为空！");
-			return forwardUrl;
+		//审批信息验证结果处理
+		if(result.hasErrors()){	//
+			List<ObjectError> list = result.getAllErrors();
+			for(ObjectError e :list){
+				String filed = e.getCodes()[0].substring(e.getCodes()[0].lastIndexOf('.')+1);
+				map.put("valid." + filed, e.getDefaultMessage());
+			}			
+			return forwardUrl;	//返回审批页面
 		}
-		if(remark == null || remark.trim().length()<6){ //审批意见为空
-			map.put("valid.remark", "审批意见：不可为空或大于6个非空字符！");
+		//拒绝则意见不可为空
+		if("R".equals(reviewLog.getStatus()) && (StringUtils.isNullOrEmpty(reviewLog.getReviewInfo()) || reviewLog.getReviewInfo().trim().length()<1)){ //审核说明为空
+			map.put("valid.reviewInfo", "审批意见：不可为空！");
 			return forwardUrl;
-		}
-		if(remark !=null && remark.length()>600){
-			map.put("valid.remark", "审批意见：不可超过600个字符！");
-			return forwardUrl ;	//返回文章审核页面
 		}
 		//文章检查
 		ArticleBrief brief = articleService.getArticleBref(articleId);
@@ -356,11 +306,14 @@ public class ArticleMgrAction {
 		if(!"0".equals(brief.getStatus())) {
 			return REDIRECT_SYS_ERROR_PAGE + "?error=" + URLEncoder.encode("操作错误：该文章未处于待审核状态！","utf-8");
 		}
-		
-		ReviewInfo reviewInfo = new ReviewInfo();
-		reviewInfo.setReviewInfo(remark);
-		reviewInfo.setReviewOpr(operator.getUserId());
-		Long id = articleService.reviewArticle(articleId,"A",reviewInfo);
+		//审批申请检查
+		ReviewApply  reviewApply = reviewCheck.geReviewApplytByID(reviewLog.getApplyId());
+		if(reviewApply == null || !"0".equals(reviewApply.getStatus())) {
+			return REDIRECT_SYS_ERROR_PAGE + "?error=" + URLEncoder.encode("操作错误：系统中无指定的待审核用户！","utf-8");
+		}
+		//审批结果保存
+		reviewLog.setReviewOpr(operator.getUserId());
+		Long id = articleService.reviewArticle(articleId,reviewLog);
 		if(id <= 0){//审批失败
 			return "redirect:/"+operator.getUsername()+ "/review/" 
 				+ "?error=" + URLEncoder.encode(ErrorCodesPropUtil.getParam(id.toString()),"utf-8");	//添加审批错误信息

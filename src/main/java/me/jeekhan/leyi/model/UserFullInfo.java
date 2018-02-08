@@ -1,5 +1,6 @@
 package me.jeekhan.leyi.model;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 import javax.validation.constraints.Email;
@@ -60,8 +61,7 @@ public class UserFullInfo {
     private String status;
     
     @NotNull
-    @Size(max=50,message="最长为50个字符！")
-    private String inviteCode;
+    private BigDecimal inviteCode;
     
     private String picture;
     
@@ -179,11 +179,11 @@ public class UserFullInfo {
     }
   
 
-	public String getInviteCode() {
+	public BigDecimal getInviteCode() {
 		return inviteCode;
 	}
 
-	public void setInviteCode(String inviteCode) {
+	public void setInviteCode(BigDecimal inviteCode) {
 		this.inviteCode = inviteCode;
 	}
 

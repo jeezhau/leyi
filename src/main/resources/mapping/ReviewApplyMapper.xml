@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="me.jeekhan.leyi.dao.ReviewApplyMapper" >
+  <resultMap id="BaseResultMap" type="me.jeekhan.leyi.model.ReviewApply" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="obj_name" property="objName" jdbcType="VARCHAR" />
+    <result column="key_id" property="keyId" jdbcType="INTEGER" />
+    <result column="apply_time" property="applyTime" jdbcType="TIMESTAMP" />
+    <result column="status" property="status" jdbcType="VARCHAR" />
+  </resultMap>
+
+
+  <sql id="Base_Column_List" >
+    id, obj_name, key_id, apply_time, status
+  </sql>
+
+  <select id="selectByID" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from tb_review_apply
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <insert id="insert" parameterType="me.jeekhan.leyi.model.ReviewApply" keyProperty="id" useGeneratedKeys="true">
+    insert into tb_review_apply (obj_name, key_id,apply_time, status)
+    values (#{objName,jdbcType=VARCHAR}, #{keyId,jdbcType=INTEGER}, 
+      #{applyTime,jdbcType=TIMESTAMP}, #{status,jdbcType=VARCHAR})
+  </insert>
+  
+  <update id="updateStatus" parameterType="map">
+   update tb_review_apply
+   set status = #{status,jdbcType=VARCHAR}
+  </update>
+  
+  <!-- 取指定对象的待审核记录 -->
+  <select id="selectWait4Review" parameterType="map" resultMap="BaseResultMap">
+   select 
+   <include refid="Base_Column_List" />
+   from tb_review_apply
+   where obj_name = #{objName,jdbcType=VARCHAR} and key_id = #{keyId,jdbcType=INTEGER} and status = '0' 
+  </select>
+  
+  <update id="updateApplyTime" parameterType="date">
+   update tb_review_apply
+   set apply_time = #{applyTime,jdbcType=TIMESTAMP}
+   where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+</mapper>

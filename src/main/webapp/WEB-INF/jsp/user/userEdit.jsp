@@ -36,7 +36,7 @@
 	  <li id="ln_editBasic" onclick="$(this).addClass('active'); $(this).siblings().removeClass('active');$('[id^=edit]').hide();$('#editBasic').show(); "><a href="#">用户基本信息变更</a></li>
 	  <li id="ln_editPwd" onclick="$(this).addClass('active'); $(this).siblings().removeClass('active');$('[id^=edit]').hide();$('#editPwd').show(); "><a href="#">密码变更</a></li>
 	  <li id="ln_editPic" onclick="$(this).addClass('active'); $(this).siblings().removeClass('active');$('[id^=edit]').hide();$('#editPic').show(); "><a href="#">个人照片变更</a></li>
-	  <li id="ln_editOther" onclick="$(this).addClass('active'); $(this).siblings().removeClass('active');$('[id^=edit]').hide();$('#editOther').show(); "><a href="#">其他信息</a></li>
+	  <li id="ln_editCode" onclick="$(this).addClass('active'); $(this).siblings().removeClass('active');$('[id^=edit]').hide();$('#editCode').show(); "><a href="#">邀请码信息</a></li>
   </ul>
   </div>
   <div class="col-sm-9">
@@ -208,19 +208,23 @@
 	</form>
   </div>
   <!-- 用户其他信息展示 -->
-  <div class="row" style="display:none" id="editOther">
-    <h3 style="text-align:center;margin:20px 0 ">其他信息</h3>
-	<form class="form-horizontal" id="otherForm" action="editPic" method ="post" autocomplete="on" role="form" >
+  <div class="row" style="display:none" id="editCode">
+    <h3 style="text-align:center;margin:20px 0 ">邀请码信息</h3>
+	<form class="form-horizontal" id="codeForm" action="" method ="post" autocomplete="on" role="form" >
 	  <div class="form-group">
         <label for="introduce" class="col-xs-2 control-label">邀请码</label>
         <div class="col-xs-6">
-          <input class="form-control" type="text" name="inviteCode" value="${targetUser.inviteCode}" readonly>
+          <input class="form-control" type="text" id="txtInviteCode" value="${availCode}" readonly>
+        </div>
+        <div class="col-xs-2">
+          <c:if test="${not empty availCode}"><button type="button" class="btn btn-primary"id="btnCreateCode" >生成</button></c:if>
+          <c:if test="${empty availCode}"><button type="button" class="btn btn-primary" id="btnCreateCode" >生成</button></c:if>
         </div>
       </div>
 	  <div class="form-group">
         <label for="introduce" class="col-xs-2 control-label">注册地址</label>
-        <div class="col-xs-6">
-          <input class="form-control" type="text" name="inviteCode" value="http://m.jeekhan.me/${contextPath}/register.jsp?inviteCode=${targetUser.inviteCode}" readonly>
+        <div class="col-xs-8">
+          <input class="form-control" type="text" id="linkInviteCode" value="http://www.jeekhan.me/${contextPath}/register.jsp?inviteCode=${availCode}" readonly>
         </div>
       </div>
 	</form>
@@ -257,6 +261,7 @@
 <script>
 
 $(document).on('ready', function() {
+	//页面初始化
 	var mode = "${mode}";
 	if(mode == ''){
 		mode = 'editBasic';
@@ -277,6 +282,23 @@ $(document).on('ready', function() {
         uploadClass: "btn btn-info",
         uploadLabel: "Upload",
         uploadIcon: "<i class=\"glyphicon glyphicon-upload\"></i> "
+    });
+    
+    $('#btnCreateCode').click(function(){
+    		$.ajax({
+    		  url: '${contextPath}/${targetUser.username}/user_mgr/createAvailCode',
+    		  data: null,
+    		  success: function(data,status,xhr){
+    			  if(data && data.code){
+    				  $('#txtInviteCode').val(data.code);
+    				  $('#linkInviteCode').val('http://www.jeekhan.me/${contextPath}/register.jsp?inviteCode=' + data.code);
+    				  $('#btnCreateCode').attr('disabled',true);
+    			  }else{
+    				  alert('生成邀请码失败！')
+    			  }
+    		  },
+    		  dataType: 'json'
+    		});
     });
 });
 

@@ -5,8 +5,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,8 +33,11 @@ import me.jeekhan.leyi.common.FileFilter;
 import me.jeekhan.leyi.common.SunSHAUtils;
 import me.jeekhan.leyi.common.SysPropUtil;
 import me.jeekhan.leyi.dto.Operator;
-import me.jeekhan.leyi.model.ReviewInfo;
+import me.jeekhan.leyi.model.InviteCode;
+import me.jeekhan.leyi.model.ReviewApply;
+import me.jeekhan.leyi.model.ReviewLog;
 import me.jeekhan.leyi.model.UserFullInfo;
+import me.jeekhan.leyi.service.ReviewCheck;
 import me.jeekhan.leyi.service.UserService;
 
 /**
@@ -41,6 +47,7 @@ import me.jeekhan.leyi.service.UserService;
  * 3、用户密码的修改保存：updatePwd；
  * 4、用户头像的修改保存：changePic；
  * 5、注册功能于 LoginAction 中
+ * 6、用户审核结果保存：approval；
  * @author Jee Khan
  *
  */
@@ -50,6 +57,8 @@ import me.jeekhan.leyi.service.UserService;
 public class UserMgrAction {
 	@Autowired
 	private UserService userService;
+	@Autowired
+	private ReviewCheck reviewCheck;
 	
 	private static String REDIRECT_SYS_ERROR_PAGE = "redirect:" + SysPropUtil.getParam("SYSTEM_ERROR_PAGE");	//跳转至错误页面
 	/**
@@ -99,6 +108,9 @@ public class UserMgrAction {
 		map.put("mode", mode);
 		map.put("targetUser", targetUser);
 		if("edit".equals(mode)) {
+			InviteCode inviteCode = userService.getAvailableCodeByUser(targetUser.getId());
+			String code = (inviteCode == null) ? "" : inviteCode.getCode().toString();
+			map.put("availCode", code);//取用户的可用邀请码
 			return "user/userEdit";	//返回用户编辑页面
 		}
 		return "user/userShow";		//返回用户信息显示页面
@@ -106,98 +118,57 @@ public class UserMgrAction {
 	
 
 	/**
-	 * 用户审核：通过
+	 * 用户审核
 	 * 【权限】
 	 * 	1、仅登录的管理员可执行该操作；
 	 * 【功能说明】
 	 *  1、判断审核的用户是否存在；
 	 *  2、执行审核通过
 	 * @param username	待审批用户名
-	 * @param remark
+	 * @param reviewLog	审批信息
 	 * @param operator
 	 * @return
 	 * @throws UnsupportedEncodingException 
 	 */
-	@RequestMapping(value="/accept",method=RequestMethod.POST)
-	public String accept(@PathVariable("username")String username,String remark,
+	@RequestMapping(value="/approval",method=RequestMethod.POST)
+	public String approvalUser(@PathVariable("username")String username,@Valid ReviewLog reviewLog,BindingResult result,
 			@ModelAttribute("operator")Operator operator,Map<String,Object> map) throws UnsupportedEncodingException{
 		String forwardUrl = "forward:/"+operator.getUsername()+"/user_mgr/review/";	//转发至用户审核页面
 		
 		if(operator == null || operator.getLevel() < 9){ //无权限
 			return REDIRECT_SYS_ERROR_PAGE + "?error=" + URLEncoder.encode("权限错误：您无权限执行该操作！","utf-8");
 		}
-		//数据合规检查
-		if(remark !=null && remark.trim().length()>600){
-			map.put("valid.remark", "审批意见：不可为空！");
-			return forwardUrl;	
-		}
+		
 		//用户检查
 		UserFullInfo user = userService.getUserFullInfo(username);
 		if(user == null){ //无该用户
 			return REDIRECT_SYS_ERROR_PAGE + "?error=" + URLEncoder.encode("操作错误：系统中无该用户信息！","utf-8");
 		}
-		if(!"0".equals(user.getStatus())) {
-			return REDIRECT_SYS_ERROR_PAGE + "?error=" + URLEncoder.encode("操作错误：该用户未处于待审核状态！","utf-8");
+
+		//审批信息验证结果处理
+		if(result.hasErrors()){	//
+			List<ObjectError> list = result.getAllErrors();
+			for(ObjectError e :list){
+				String filed = e.getCodes()[0].substring(e.getCodes()[0].lastIndexOf('.')+1);
+				map.put("valid." + filed, e.getDefaultMessage());
+			}			
+			return forwardUrl;	//返回审批页面
 		}
-		
-		remark = remark.trim();
-		ReviewInfo reviewInfo = new ReviewInfo();
-		reviewInfo.setReviewInfo(remark);
-		reviewInfo.setReviewOpr(operator.getUserId());
-		Long id = userService.reviewUser(user.getId(), "A",reviewInfo);
+		//拒绝则意见不可为空
+		if("R".equals(reviewLog.getStatus()) && (StringUtils.isNullOrEmpty(reviewLog.getReviewInfo()) || reviewLog.getReviewInfo().trim().length()<1)){ //审核说明为空
+			map.put("valid.reviewInfo", "审批意见：不可为空！");
+			return forwardUrl;
+		}
+		//审批申请检查
+		ReviewApply  reviewApply = reviewCheck.geReviewApplytByID(reviewLog.getApplyId());
+		if(reviewApply == null || !"0".equals(reviewApply.getStatus())) {
+			return REDIRECT_SYS_ERROR_PAGE + "?error=" + URLEncoder.encode("操作错误：系统中无指定的待审核用户！","utf-8");
+		}
+		//审批结果保存
+		reviewLog.setReviewOpr(operator.getUserId());
+		Long id = userService.reviewUser(user.getId(),reviewLog);
 		if(id <= 0){//审批失败
 			return "redirect:/"+operator.getUsername()+ "/review/" + "?error=" + ErrorCodesPropUtil.getParam(id.toString());	//添加审批错误信息
-		}else {
-			return "redirect:/"+operator.getUsername()+ "/review/";	//跳转至审核页面
-		}
-	}
-	
-	/**
-	 * 用户审核：拒绝
-	 * 【权限】
-	 * 	1、仅登录的管理员可执行该操作；
-	 * 【功能说明】
-	 *  1、判断审核的用户是否存在；
-	 *  2、执行审核拒绝
-	 * @param userId
-	 * @param remark
-	 * @param operator
-	 * @return
-	 * @throws UnsupportedEncodingException 
-	 */
-	@RequestMapping(value="/refuse",method=RequestMethod.POST)
-	public String refuse(@PathVariable("username") String username,String remark,
-			@ModelAttribute("operator")Operator operator,Map<String,Object> map) throws UnsupportedEncodingException{
-		String forwardUrl = "forward:/"+operator.getUsername()+"/user_mgr/review/";	//转发至用户审核页面
-		if(operator == null || operator.getLevel() < 9){ //无权限
-			return REDIRECT_SYS_ERROR_PAGE + "?error=" + URLEncoder.encode("权限错误：您无权限执行该操作！","utf-8");
-		}
-		//数据合规检查
-		if(StringUtils.isNullOrEmpty(remark) || remark.trim().length()<1){ //审核说明为空
-			map.put("valid.remark", "审批意见：不可为空！");
-			return forwardUrl;
-		}
-		if(remark.trim().length()>600){
-			map.put("valid.remark", "审批意见：不可超过600个字符！");
-			return forwardUrl;
-		}
-		//用户检查
-		UserFullInfo user = userService.getUserFullInfo(username);
-		if(user == null){ //无该用户
-			return REDIRECT_SYS_ERROR_PAGE + "?error=" + URLEncoder.encode("操作错误：系统中无该用户信息！","utf-8");
-		}
-		if(!"0".equals(user.getStatus())) {
-			return REDIRECT_SYS_ERROR_PAGE + "?error=" + URLEncoder.encode("操作错误：该用户未处于待审核状态！","utf-8");
-		}
-		
-		remark = remark.trim();
-		ReviewInfo reviewInfo = new ReviewInfo();
-		reviewInfo.setReviewInfo(remark);
-		reviewInfo.setReviewOpr(operator.getUserId());
-		Long id = userService.reviewUser(user.getId(), "R",reviewInfo);
-		if(id <= 0){//审批失败
-			return "redirect:/"+operator.getUsername()+ "/review/" 
-				+ "?error=" + URLEncoder.encode(ErrorCodesPropUtil.getParam(id.toString()),"utf-8");	//添加审批错误信息
 		}else {
 			return "redirect:/"+operator.getUsername()+ "/review/";	//跳转至审核页面
 		}
@@ -218,7 +189,7 @@ public class UserMgrAction {
 	 * @throws NoSuchAlgorithmException 
 	 */
 	@RequestMapping(value="/updateBasic",method=RequestMethod.POST)
-	public String updateUserBasic(@PathVariable("username")String username,@Valid UserFullInfo userInfo,BindingResult result,
+	public String updateBasic(@PathVariable("username")String username,@Valid UserFullInfo userInfo,BindingResult result,
 			@ModelAttribute("operator")Operator operator,Map<String,Object> map) throws NoSuchAlgorithmException, UnsupportedEncodingException{
 		//用户与编辑权限检查
 		UserFullInfo oldInfo = userService.getUserFullInfo(username);
@@ -306,7 +277,7 @@ public class UserMgrAction {
 	 * @throws NoSuchAlgorithmException 
 	 */
 	@RequestMapping(value="/changePic",method=RequestMethod.POST)
-	public String editUser(@PathVariable("username")String username, MultipartFile picFile,@ModelAttribute("operator")Operator operator,Map<String,Object> map) throws IOException, NoSuchAlgorithmException{
+	public String changePic(@PathVariable("username")String username, MultipartFile picFile,@ModelAttribute("operator")Operator operator,Map<String,Object> map) throws IOException, NoSuchAlgorithmException{
 		//用户与编辑权限检查
 		UserFullInfo oldInfo = userService.getUserFullInfo(username);
 		if(operator == null || oldInfo == null || operator.getUserId() != oldInfo.getId()){ //无权限	
@@ -356,5 +327,33 @@ public class UserMgrAction {
 		
 		return "redirect:/"+operator.getUsername()+ "/user_mgr/detail";	//返回用户详情显示页面
 	}
+	
+	/**
+	 * 获取用户的可用邀请码
+	 * 1、如果用户现有可用的邀请码则直接返回；
+	 * 2、否则，生成新的邀请码返回；
+	 * @return
+	 * @throws UnsupportedEncodingException 
+	 */
+	@RequestMapping("/createAvailCode")
+	@ResponseBody
+	public Object createAvailCode(@PathVariable("username")String username, @ModelAttribute("operator")Operator operator) throws UnsupportedEncodingException{
+		UserFullInfo oldInfo = userService.getUserFullInfo(username);
+		if(operator == null || oldInfo == null || operator.getUserId() != oldInfo.getId()){ //无权限	
+			return REDIRECT_SYS_ERROR_PAGE + "?error=" + URLEncoder.encode("权限错误：您无权限执行该操作！","utf-8");
+		}
+		Map<String,String> ret = new HashMap<String,String>();
+		InviteCode inviteCode = userService.getAvailableCodeByUser(oldInfo.getId());
+		BigDecimal code = null;
+		if(inviteCode == null) {
+			code = userService.createNewCode(oldInfo.getId());
+		}else {
+			code = inviteCode.getCode();
+		}
+		ret.put("code", code.toString());
+		return ret;
+	}
 }
+
+
 

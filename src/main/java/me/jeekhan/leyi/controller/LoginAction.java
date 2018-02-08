@@ -106,9 +106,10 @@ public class LoginAction {
 	 * @throws IOException
 	 */
 	@RequestMapping(value="/createUser",method=RequestMethod.POST)
-	public String addUser(@Valid UserFullInfo userInfo,BindingResult result,@RequestParam(value="picFile",required=false)MultipartFile file,
+	public String createUser(@Valid UserFullInfo userInfo,BindingResult result,@RequestParam(value="picFile",required=false)MultipartFile file,
 			Map<String,Object>map,HttpServletRequest request) throws NoSuchAlgorithmException, IOException{
 		//用户信息验证结果处理
+		map.put("userInfo", userInfo);
 		if(result.hasErrors()){	//
 			List<ObjectError> list = result.getAllErrors();
 			for(ObjectError e :list){
@@ -117,14 +118,13 @@ public class LoginAction {
 			}			
 			return "register";	//返回注册页面
 		}
-
+		
 		//邀请码验证
-//		userInfo.setInviteCode(userInfo.getInviteCode().replace(",", ""));
-//		InviteInfo inviteInfo = inviteInfoService.get(userInfo.getInviteCode());
-//		if(inviteInfo == null || "1".equals(inviteInfo.getStatus())){
-//			map.put("inviteCode", "邀请码不正确或已被使用");
-//			return "register";
-//		}
+		boolean b = userService.isAvailableCode(userInfo.getInviteCode());
+		if(!b){
+			map.put("valid.inviteCode", "邀请码不正确（不存在、已超过使用期、超过可使用次数）！");
+			return "register";
+		}
 		//头像文件重命名
 		String fileName = null;
 		if(file != null && !file.isEmpty()){

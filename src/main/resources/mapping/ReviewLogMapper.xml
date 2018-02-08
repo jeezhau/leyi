@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="me.jeekhan.leyi.dao.ReviewLogMapper" >
+  <resultMap id="BaseResultMap" type="me.jeekhan.leyi.model.ReviewLog" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="apply_id" property="applyId" jdbcType="INTEGER" />
+    <result column="original_info" property="originalInfo" jdbcType="LONGVARCHAR" />
+    <result column="review_info" property="reviewInfo" jdbcType="VARCHAR" />
+    <result column="review_opr" property="reviewOpr" jdbcType="INTEGER" />
+    <result column="review_time" property="reviewTime" jdbcType="TIMESTAMP" />
+    <result column="status" property="status" jdbcType="CHAR" />
+  </resultMap>
+
+
+  <sql id="Base_Column_List" >
+    id, apply_id, original_info,review_info, review_opr, review_time, status
+  </sql>
+
+  <select id="selectByID" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from tb_review_log
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <insert id="insert" parameterType="me.jeekhan.leyi.model.ReviewLog" keyProperty="id" useGeneratedKeys="true">
+    insert into tb_review_log (apply_id, review_info, review_opr, review_time,status, original_info)
+    values (#{applyId,jdbcType=INTEGER}, 
+      #{reviewInfo,jdbcType=VARCHAR}, #{reviewOpr,jdbcType=INTEGER}, #{reviewTime,jdbcType=TIMESTAMP}, 
+      #{status,jdbcType=CHAR}, #{originalInfo,jdbcType=LONGVARCHAR})
+  </insert>
+  
+</mapper>

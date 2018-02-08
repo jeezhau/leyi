@@ -1,11 +1,13 @@
 package me.jeekhan.leyi.service;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 import me.jeekhan.leyi.common.PageCond;
-import me.jeekhan.leyi.model.ReviewInfo;
+import me.jeekhan.leyi.model.InviteCode;
+import me.jeekhan.leyi.model.ReviewLog;
 import me.jeekhan.leyi.model.UserBaseInfo;
 import me.jeekhan.leyi.model.UserFullInfo;
 
@@ -65,6 +67,27 @@ public interface UserService {
 	 * @param reviewInfo	审核说明
 	 * @return	用户ID
 	 */
-	public Long reviewUser(Long userId,String result,ReviewInfo reviewInfo);
+	public Long reviewUser(Long userId,ReviewLog reviewLog);
+	
+	/**
+	 * 取用户当前可用的邀请码
+	 * @param userId
+	 * @return
+	 */
+	public InviteCode getAvailableCodeByUser(Long userId);
+	
+	
+	/**
+	 * 判断邀请码是否可用
+	 * @param code
+	 * @return
+	 */
+	public boolean isAvailableCode(BigDecimal code);
+	
+	/**
+	 * 创建用户新的邀请码
+	 * @return
+	 */
+	public BigDecimal createNewCode(Long userId);
 
 }

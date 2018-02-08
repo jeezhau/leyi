@@ -9,6 +9,7 @@ package me.jeekhan.leyi.common;
 
 public class ErrorCodes {
 	public static Long LESS_INFO = 0L;	//缺少信息
+	public static Long DB_UPDATE_ERR = -1L;	//数据库更新/新增失败
 	
 	//用户信息相关错误码，功能码：100
 	public static Long USER_USERNAME_USED = -100001L;	//用户名已被使用

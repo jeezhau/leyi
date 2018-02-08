@@ -6,7 +6,7 @@ import java.util.Map;
 import me.jeekhan.leyi.common.PageCond;
 import me.jeekhan.leyi.model.ArticleBrief;
 import me.jeekhan.leyi.model.ArticleDetail;
-import me.jeekhan.leyi.model.ReviewInfo;
+import me.jeekhan.leyi.model.ReviewLog;
 
 /**
  * 文章相关服务
@@ -103,10 +103,9 @@ public interface ArticleService {
 	/**
 	 * 文章审核
 	 * @param articleId	文章ID
-	 * @param result	  	审核结果：A-通过，R-拒绝
-	 * @param reviewInfo	审核信息
+	 * @param reviewLog	审核信息
 	 */
-	public Long reviewArticle(Long articleId,String result,ReviewInfo reviewInfo);
+	public Long reviewArticle(Long articleId,ReviewLog reviewLog);
 	
 	/**
 	 * 取待审核文章数量

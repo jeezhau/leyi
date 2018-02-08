@@ -1,6 +1,7 @@
 package me.jeekhan.leyi.service.impl;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.List;
@@ -11,10 +12,15 @@ import org.springframework.stereotype.Service;
 import me.jeekhan.leyi.common.ErrorCodes;
 import me.jeekhan.leyi.common.PageCond;
 import me.jeekhan.leyi.common.SunSHAUtils;
-import me.jeekhan.leyi.dao.ReviewInfoMapper;
+import me.jeekhan.leyi.common.SysPropUtil;
+import me.jeekhan.leyi.dao.InviteCodeMapper;
+import me.jeekhan.leyi.dao.ReviewApplyMapper;
+import me.jeekhan.leyi.dao.ReviewLogMapper;
 import me.jeekhan.leyi.dao.UserBaseInfoMapper;
 import me.jeekhan.leyi.dao.UserFullInfoMapper;
-import me.jeekhan.leyi.model.ReviewInfo;
+import me.jeekhan.leyi.model.InviteCode;
+import me.jeekhan.leyi.model.ReviewApply;
+import me.jeekhan.leyi.model.ReviewLog;
 import me.jeekhan.leyi.model.UserBaseInfo;
 import me.jeekhan.leyi.model.UserFullInfo;
 import me.jeekhan.leyi.service.UserService;
@@ -26,7 +32,11 @@ public class UserServiceImpl implements UserService{
 	@Autowired
 	private UserFullInfoMapper userFullInfoMapper;
 	@Autowired
-	private ReviewInfoMapper reviewInfoMapper;
+	private ReviewLogMapper reviewInfoMapper;
+	@Autowired
+	private ReviewApplyMapper reviewApplyMapper;
+	@Autowired
+	private InviteCodeMapper inviteCodeMapper;
 	
 	/**
 	 * 提取用户基本信息
@@ -80,9 +90,11 @@ public class UserServiceImpl implements UserService{
 	}
 	
 	/**
-	 * 保存用户：有则更新，无则修改
+	 * 保存用户
+	 * 1、有则更新，无则修改；
+	 * 2、新增审批申请记录；
 	 * @param	用户详细信息
-	 * @return	用户ID,0-缺少信息，-1-用户名已被使用,-2-邮箱已被使用
+	 * @return	用户ID、错误码
 	 * @throws UnsupportedEncodingException 
 	 * @throws NoSuchAlgorithmException 
 	 */
@@ -107,22 +119,21 @@ public class UserServiceImpl implements UserService{
 			userFullInfo.setUpdateTime(new Date());
 			userFullInfoMapper.insert(userFullInfo);
 			Long userId = userFullInfo.getId();	//取新增用户的ID
-//			//修改邀请码的使用状态
-//			String inviteCode = userFullInfo.getInviteCode();
-//			InviteInfo inviteInfo = inviteInfoMapper.selectByPrimaryKey(inviteCode);
-//			inviteInfo.setStatus("1");
-//			inviteInfo.setUseTime(new Date());
-//			inviteInfoMapper.updateByPrimaryKey(inviteInfo);
-//			//为用户补充一个邀请码
-//			InviteInfo Invite = new InviteInfo();
-//			Invite.setCrtTime(new Date());
-//			Invite.setCrtUser(inviteInfo.getCrtUser());
-//			inviteInfoMapper.insert(Invite);
-//			//为新增用户添加一个邀请码
-//			InviteInfo newInvite = new InviteInfo();
-//			newInvite.setCrtTime(new Date());
-//			newInvite.setCrtUser(userId);
-//			inviteInfoMapper.insert(newInvite);
+			//修改邀请码的使用次数
+			inviteCodeMapper.updateUsedCnt(userFullInfo.getInviteCode());
+			//新插入或更新审批申请
+			String objName = SysPropUtil.getParam("USER");
+			ReviewApply apply = reviewApplyMapper.selectWait4Review(objName, userId);
+			if(apply != null) {
+				reviewApplyMapper.updateApplyTime(apply.getId(),new Date());
+			}else {
+				apply = new ReviewApply();
+				apply.setObjName(objName);
+				apply.setKeyId(userId);
+				apply.setApplyTime(new Date());
+				apply.setStatus("0"); //待审核
+				reviewApplyMapper.insert(apply);
+			}
 			return userId;
 		}else{	//修改
 			oldInfo = userFullInfoMapper.selectByPrimaryKey(userFullInfo.getId());
@@ -166,20 +177,51 @@ public class UserServiceImpl implements UserService{
 	/**
 	 * 用户审核
 	 * @param userId		用户ID
-	 * @param result		审核结果:A-通过,R-拒绝
-	 * @param reviewInfo	审核说明
+	 * @param reviewLog	审核信息
 	 * @return	用户ID
 	 */
 	@Override
-	public Long reviewUser(Long userId,String result,ReviewInfo reviewInfo){
+	public Long reviewUser(Long userId,ReviewLog reviewLog){
 		String usrInfo = userFullInfoMapper.selectByPrimaryKey(userId).toString();
-		reviewInfo.setObjName("tb_user_full_info");
-		reviewInfo.setKeyId(userId);
-		reviewInfo.setOriginalInfo(usrInfo);
-		reviewInfo.setResult(result);
-		reviewInfo.setReviewTime(new Date());
-		reviewInfoMapper.insert(reviewInfo);
-		return userFullInfoMapper.updateStatus(userId, result);
+		reviewLog.setOriginalInfo(usrInfo);
+		reviewLog.setReviewTime(new Date());
+		reviewInfoMapper.insert(reviewLog);
+		reviewApplyMapper.updateStatus(reviewLog.getApplyId(), reviewLog.getStatus());
+		return userFullInfoMapper.updateStatus(userId, reviewLog.getStatus());
 	}
-
+	
+	/**
+	 * 取用户当前可用的邀请码
+	 * @param userId
+	 * @return
+	 */
+	public InviteCode getAvailableCodeByUser(Long userId) {
+		return inviteCodeMapper.selectAvailableByUser(userId);
+	}
+	
+	/**
+	 * 判断邀请码是否可用
+	 * @param code
+	 * @return
+	 */
+	public boolean isAvailableCode(BigDecimal code) {
+		int cnt = inviteCodeMapper.isAvailableCode(code);
+		if(cnt == 1) {
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * 创建用户新的邀请码
+	 * @return
+	 */
+	public BigDecimal createNewCode(Long userId) {
+		InviteCode inviteCode = new InviteCode();
+		inviteCode.setCreateOpr(userId);
+		inviteCode.setCreateTime(new Date());
+		inviteCode.setUsedCnt(0);
+		inviteCodeMapper.insert(inviteCode);
+		return inviteCode.getCode();
+	}
 }

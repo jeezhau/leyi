@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="me.jeekhan.leyi.dao.InviteCodeMapper" >
+  <resultMap id="BaseResultMap" type="me.jeekhan.leyi.model.InviteCode" >
+    <id column="code" property="code" jdbcType="INTEGER" />
+    <result column="create_opr" property="createOpr" jdbcType="INTEGER" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="used_cnt" property="usedCnt" jdbcType="INTEGER" />
+  </resultMap>
+
+
+  <sql id="Base_Column_List" >
+    code, create_opr, create_time, used_cnt
+  </sql>
+
+  <select id="selectByID" resultMap="BaseResultMap" parameterType="bigdecimal" >
+    select 
+    <include refid="Base_Column_List" />
+    from tb_invite_code
+    where code = #{code,jdbcType=INTEGER}
+  </select>
+
+  <insert id="insert" parameterType="me.jeekhan.leyi.model.InviteCode" keyProperty="code" useGeneratedKeys="true">
+    insert into tb_invite_code (create_opr, create_time, used_cnt)
+    values (#{createOpr,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP},#{usedCnt,jdbcType=INTEGER})
+  </insert>
+  
+  <!--取用户当前可用的邀请码-->
+  <select id="selectAvailableByUser" parameterType="long" resultMap="BaseResultMap"> 
+    select 
+    <include refid="Base_Column_List" />
+    from tb_invite_code
+    where create_opr = #{userId,jdbcType=INTEGER}
+    and (TO_DAYS(NOW()) - TO_DAYS(create_time)) &lt; 30 
+    and used_cnt &lt; 10 
+  </select>
+	
+	<!--更新邀请码的使用次数 -->
+	<update id="updateUsedCnt" parameterType="bigdecimal">
+	update tb_invite_code
+	set used_cnt = used_cnt + 1 
+	where code = #{code,jdbcType=INTEGER}
+	</update>
+	
+	<!--判断邀请码是否可用 -->
+    <select id="isAvailableCode" parameterType="bigdecimal" resultType="int"> 
+    select count(1)
+    from tb_invite_code
+    where code = #{code,jdbcType=INTEGER}
+    and (TO_DAYS(NOW()) - TO_DAYS(create_time)) &lt; 30 
+    and used_cnt &lt; 10 
+  </select>
+  
+</mapper>

@@ -11,11 +11,12 @@ import me.jeekhan.leyi.common.ErrorCodes;
 import me.jeekhan.leyi.common.PageCond;
 import me.jeekhan.leyi.dao.ArticleBriefMapper;
 import me.jeekhan.leyi.dao.ArticleDetailMapper;
-import me.jeekhan.leyi.dao.ReviewInfoMapper;
+import me.jeekhan.leyi.dao.ReviewApplyMapper;
+import me.jeekhan.leyi.dao.ReviewLogMapper;
 import me.jeekhan.leyi.dao.ThemeClassMapper;
 import me.jeekhan.leyi.model.ArticleBrief;
 import me.jeekhan.leyi.model.ArticleDetail;
-import me.jeekhan.leyi.model.ReviewInfo;
+import me.jeekhan.leyi.model.ReviewLog;
 import me.jeekhan.leyi.model.ThemeClass;
 import me.jeekhan.leyi.service.ArticleService;
 
@@ -32,9 +33,11 @@ public class ArticleServiceImpl implements ArticleService {
 	@Autowired
 	private ArticleDetailMapper  articleDetailMapper;
 	@Autowired
-	private ReviewInfoMapper reviewInfoMapper;
+	private ReviewLogMapper reviewLogMapper;
 	@Autowired
 	private ThemeClassMapper themeClassMapper;
+	@Autowired
+	private ReviewApplyMapper reviewApplyMapper;
 	/**
 	 * 获取指定文章概要信息
 	 * @param articleId	文章ID
@@ -208,24 +211,20 @@ public class ArticleServiceImpl implements ArticleService {
 	/**
 	 * 文章审核
 	 * @param articleId	文章ID
-	 * @param result	  	审核结果：A-通过，R-拒绝
-	 * @param reviewInfo	审核信息
+	 * @param reviewLog	审核信息
 	 */
-	public Long reviewArticle(Long articleId,String result,ReviewInfo reviewInfo) {
+	public Long reviewArticle(Long articleId,ReviewLog reviewLog) {
 		String briefInfo = articleBriefMapper.selectByPrimaryKey(articleId).toString();
-		reviewInfo.setObjName("tb_article_brief");
-		reviewInfo.setKeyId(articleId);
-		reviewInfo.setOriginalInfo(briefInfo);
-		reviewInfo.setResult(result);
-		reviewInfo.setReviewTime(new Date());
-		reviewInfoMapper.insert(reviewInfo);
+		reviewLog.setOriginalInfo(briefInfo);
+		reviewLog.setReviewTime(new Date());
+		reviewLogMapper.insert(reviewLog);
 		
 		String contentInfo = articleDetailMapper.selectByPrimaryKey(articleId).toString();
-		reviewInfo.setObjName("tb_article_detail");
-		reviewInfo.setOriginalInfo(contentInfo);
-		reviewInfoMapper.insert(reviewInfo);
+		reviewLog.setOriginalInfo(contentInfo);
+		reviewLogMapper.insert(reviewLog);
 		
-		return articleBriefMapper.updateStatus(articleId,result);
+		reviewApplyMapper.updateStatus(reviewLog.getApplyId(), reviewLog.getStatus());
+		return articleBriefMapper.updateStatus(articleId,reviewLog.getStatus());
 		
 	}
 	/**
