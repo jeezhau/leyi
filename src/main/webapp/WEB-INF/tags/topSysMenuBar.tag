@@ -8,6 +8,7 @@
 		<li><a href="${contextPath}/${operator.username }/theme_mgr/" >主题管理</a></li>
 		<li><a href="${contextPath}/${operator.username }/article_mgr/" >文章管理</a></li>
 		<li><a href="${contextPath}/${operator.username }/review" >信息审核</a></li>
+		<li><a href="${contextPath}/${operator.username }/role_mgr/">角色管理</a></li>
 		<li><a href="${contextPath}/${operator.username }">我的主页</a></li>
 		<li><a href="${contextPath}/logout">退出</a></li>
 	</ul>

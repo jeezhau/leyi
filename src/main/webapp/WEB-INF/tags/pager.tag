@@ -6,7 +6,7 @@
 分页处理
 1、页面需要设置查询表单(id=searchForm)，表单中设置查询条件，条件命名与MappedStatement中的字段名一致；并且表单的action需设置为目标URL；
 2、表单中设置掩藏字段:begin；如果需要个性化控制每页记录数，则可添加掩藏字段：pageSize;
-3、表单中设置掩藏字段：condParams，该字段为所有查询参数的 json 字符串表示；
+3、表单中设置掩藏字段：condParams，该字段为所有查询参数的 json 字符串表示，包括分页信息；
  --%>
 <ul class="pager" style="margin:0"> 
 <c:if test="${pageCond.begin>0 }"><li id="upPage" class="active"><a href="###">上一页</a></li></c:if>

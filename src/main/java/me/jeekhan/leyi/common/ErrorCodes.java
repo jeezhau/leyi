@@ -9,7 +9,7 @@ package me.jeekhan.leyi.common;
 
 public class ErrorCodes {
 	public static Long LESS_INFO = 0L;	//缺少信息
-	public static Long DB_UPDATE_ERR = -1L;	//数据库更新/新增失败
+	public static Long DB_CRUD_ERR = -1L;	//数据库操作失败
 	
 	//用户信息相关错误码，功能码：100
 	public static Long USER_USERNAME_USED = -100001L;	//用户名已被使用
@@ -28,4 +28,11 @@ public class ErrorCodes {
 	//文章信息相关错误码：功能码：102
 	public static Long ARTICLE_ID_ERROR = -102001L;		//文章数据非法：更新文章ID非法：
 	public static Long ARTICLE_THEMEID_ERROR = -102002L;	//文章数据非法：新增主题ID非法
+	
+	//角色管理相关错误码，功能码：103
+	public static Long ROLE_EXISTS_SAME_ROLE = -103001L;	//已存在同名的角色
+	public static Long ROLE_EXISTS_SAME_FUNC = -103002L;	//已存在同URL的功能
+	
+	
+	
 }

@@ -8,7 +8,6 @@
     <result column="used_cnt" property="usedCnt" jdbcType="INTEGER" />
   </resultMap>
 
-
   <sql id="Base_Column_List" >
     code, create_opr, create_time, used_cnt
   </sql>

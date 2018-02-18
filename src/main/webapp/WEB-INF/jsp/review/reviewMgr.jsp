@@ -24,7 +24,7 @@
 
 </div>
 <div class="container">
-  <jk:loginMenuBar></jk:loginMenuBar>
+  <jk:topSysMenuBar></jk:topSysMenuBar>
   <div class="row">
   <c:if test="${fn:length(users)<=0 }">
    <div class="col-md-12" >

@@ -114,8 +114,8 @@ public class LoginAction {
 			List<ObjectError> list = result.getAllErrors();
 			for(ObjectError e :list){
 				String filed = e.getCodes()[0].substring(e.getCodes()[0].lastIndexOf('.')+1);
-				map.put(filed, e.getDefaultMessage());
-			}			
+				map.put("valid." + filed, e.getDefaultMessage());
+			}
 			return "register";	//返回注册页面
 		}
 		

@@ -10,7 +10,7 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">  
-  <title>${userInfo.username}的主页</title>
+  <title>${targetUser.username}的主页</title>
   <meta name="description" content="">
   <meta name="author" content="jeekhan">
   <link rel="shortcut icon" href="${contextPath}/images${contextPath}.ico" type="image/x-icon" />
