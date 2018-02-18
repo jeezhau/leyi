@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="me.jeekhan.leyi.dao.FuncRoleMapper" >
+  <resultMap id="BaseResultMap" type="me.jeekhan.leyi.model.FuncRole" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="func_id" property="funcId" jdbcType="INTEGER"/>
+    <result column="role_id" property="roleId" jdbcType="INTEGER"/>
+    <result column="update_opr" property="updateOpr" jdbcType="INTEGER" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="status" property="status" jdbcType="CHAR" />
+    <association property="func" column="func_id" javaType="me.jeekhan.leyi.model.FuncInfo" >
+		<id property="id" column="func_id"/>
+		<result property="name" column="name"/>
+		<result property="url" column="func_url"/> 
+		<result property="desc" column="func_desc"/> 
+		<result property="status" column="func_status"/> 
+	</association>
+	<association property="role" column="role_id" javaType="me.jeekhan.leyi.model.RoleInfo" >
+		<id property="id" column="role_id"/>
+		<result property="name" column="role_name"/> 
+		<result property="desc" column="role_desc"/> 
+		<result property="status" column="role_status"/> 
+	</association>
+  </resultMap>
+
+
+  <sql id="Base_Column_List" >
+    fr.id, fr.func_id,fr.role_id,fr.update_opr, fr.update_time, fr.status,
+    fi.func_url,fi.func_desc,fi.func_status,
+    ri.role_name,ri.role_desc,ri.role_status
+  </sql>
+
+  <select id="selectByID" resultMap="BaseResultMap" parameterType="int" >
+    select 
+    <include refid="Base_Column_List" />
+    from tb_func_role fr
+    join tb_func_info fi on fr.func_id = fi.id
+    join tb_role_info ri on fr.role_id = ri.id
+    where fr.id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="selectByFuncRole" resultMap="BaseResultMap" parameterType="map" >
+    select 
+    <include refid="Base_Column_List" />
+    from tb_func_role fr
+    join tb_func_info fi on fr.func_id = fi.id
+    join tb_role_info ri on fr.role_id = ri.id
+    where fr.func_id = #{funcId,jdbcType=INTEGER} 
+    and fr.role_id = #{roleId,jdbcType=INTEGER}
+  </select>
+  
+  <insert id="insert" parameterType="me.jeekhan.leyi.model.FuncRole" keyProperty="id" useGeneratedKeys="true">
+    insert into tb_func_role (func_id,role_id,update_opr, update_time, status)
+    values (#{funcId,jdbcType=INTEGER},#{roleId,jdbcType=INTEGER},#{updateOpr,jdbcType=INTEGER}, #{updateTime,jdbcType=TIMESTAMP},#{status,jdbcType=CHAR})
+  </insert>
+	
+	<!--更新功能角色信息 -->
+	<update id="update" parameterType="me.jeekhan.leyi.model.FuncRole">
+	update tb_func_role
+	<set>
+		<if test="funcId != null">
+		func_id = #{funcId,jdbcType=INTEGER},
+		</if>
+		<if test="roleId != null">
+		role_id = #{roleId,jdbcType=INTEGER}
+		</if>
+		<if test="updateOpr != null">
+		update_opr = #{updateOpr,jdbcType=INTEGER},
+		</if>
+		<if test="updateTime != null">
+		update_time = #{updateTime,jdbcType=TIMESTAMP},
+		</if>
+		<if test="status != null">
+		status = #{status,jdbcType=CHAR},
+		</if>
+	</set>
+	where id = #{id,jdbcType=INTEGER}
+	</update>
+	
+	<!--逻辑删除功能角色信息 -->
+    <update id="delete" parameterType="int" > 
+    update tb_func_role
+    set status = 'D'
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+</mapper>
+

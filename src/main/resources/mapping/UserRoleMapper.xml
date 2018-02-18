@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="me.jeekhan.leyi.dao.UserRoleMapper" >
+  <resultMap id="BaseResultMap" type="me.jeekhan.leyi.model.UserRole" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="user_id" property="userId" jdbcType="INTEGER"/>
+    <result column="role_id" property="roleId" jdbcType="INTEGER"/>
+    <result column="update_opr" property="updateOpr" jdbcType="INTEGER" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="status" property="status" jdbcType="CHAR" />
+    <association property="user" column="user_id" javaType="me.jeekhan.leyi.model.UserFullInfo" >
+		<id property="id" column="user_id"/>
+		<result property="username" column="username"/> 
+		<result property="email" column="email"/> 
+		<result property="birthday" column="birthday"/> 
+	</association>
+	<association property="role" column="role_id" javaType="me.jeekhan.leyi.model.RoleInfo" >
+		<id property="id" column="role_id"/>
+		<result property="name" column="role_name"/> 
+		<result property="desc" column="role_desc"/> 
+		<result property="status" column="role_status"/> 
+	</association>
+  </resultMap>
+
+
+  <sql id="Base_Column_List" >
+    ur.id, ur.user_id,ur.role_id,ur.update_opr, ur.update_time, ur.status,
+    uf.username,uf.email,uf.birthday,
+    ri.role_name,ri.role_desc,ri.role_status
+  </sql>
+
+  <select id="selectByID" resultMap="BaseResultMap" parameterType="long" >
+    select 
+    <include refid="Base_Column_List" />
+    from tb_user_role ur
+    join tb_user_full_info uf on ur.user_id = uf.id
+    join tb_role_info ri on ur.role_id = ri.id
+    where ur.id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="selectByUserRole" resultMap="BaseResultMap" parameterType="map" >
+    select 
+    <include refid="Base_Column_List" />
+    from tb_user_role ur
+    join tb_user_full_info uf on ur.user_id = uf.id
+    join tb_role_info ri on ur.role_id = ri.id
+    where ur.user_id = #{userId,jdbcType=INTEGER} and ur.role_id = #{roleId,jdbcType=INTEGER}
+  </select>
+  
+  <insert id="insert" parameterType="me.jeekhan.leyi.model.UserRole" keyProperty="id" useGeneratedKeys="true">
+    insert into tb_user_role (user_id,role_id,update_opr, update_time, status)
+    values (#{userId,jdbcType=INTEGER},#{roleId,jdbcType=INTEGER},#{updateOpr,jdbcType=INTEGER}, #{updateTime,jdbcType=TIMESTAMP},#{status,jdbcType=CHAR})
+  </insert>
+	
+	<!--更新用户角色信息 -->
+	<update id="update" parameterType="me.jeekhan.leyi.model.UserRole">
+	update tb_user_role
+	<set>
+		<if test="userId != null">
+		user_id = #{userId,jdbcType=INTEGER},
+		</if>
+		<if test="roleId != null">
+		role_id = #{roleId,jdbcType=INTEGER}
+		</if>
+		<if test="updateOpr != null">
+		update_opr = #{updateOpr,jdbcType=INTEGER},
+		</if>
+		<if test="updateTime != null">
+		update_time = #{updateTime,jdbcType=TIMESTAMP},
+		</if>
+		<if test="status != null">
+		status = #{status,jdbcType=CHAR},
+		</if>
+	</set>
+	where id = #{id,jdbcType=INTEGER}
+	</update>
+	
+	<!--逻辑删除用户角色信息 -->
+    <update id="delete" parameterType="long" > 
+    update tb_user_role
+    set status = 'D'
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+</mapper>
+

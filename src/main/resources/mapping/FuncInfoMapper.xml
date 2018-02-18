@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="me.jeekhan.leyi.dao.FuncInfoMapper" >
+  <resultMap id="BaseResultMap" type="me.jeekhan.leyi.model.FuncInfo" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="url" property="url" jdbcType="VARCHAR"/>
+    <result column="name" property="name" jdbcType="VARCHAR"/>
+    <result column="desc" property="desc" jdbcType="VARCHAR"/>
+    <result column="update_opr" property="updateOpr" jdbcType="INTEGER" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="status" property="status" jdbcType="CHAR" />
+    <collection property="roles" ofType="me.jeekhan.leyi.model.RoleInfo">
+		<id property="id" column="role_id"/>
+		<result property="name" column="role_name"/>
+		<result property="desc" column="role_desc"/>
+		<result property="status" column="role_status"/>
+	</collection>
+  </resultMap>
+
+
+  <sql id="Base_Column_List" >
+    id, name, url, desc, update_opr, update_time, status
+  </sql>
+
+  <select id="selectByID" resultMap="BaseResultMap" parameterType="int" >
+    select 
+    <include refid="Base_Column_List" />
+    from tb_Func_info
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="selectByURL" resultMap="BaseResultMap" parameterType="string" >
+    select 
+    <include refid="Base_Column_List" />
+    from tb_func_info
+    where url = #{url,jdbcType=VARCHAR}
+  </select>
+  
+  <insert id="insert" parameterType="me.jeekhan.leyi.model.FuncInfo" keyProperty="id" useGeneratedKeys="true">
+    insert into tb_func_info (url,name,desc,update_opr, update_time, status)
+    values (#{url,jdbcType=VARCHAR},#{name,jdbcType=VARCHAR},#{desc,jdbcType=VARCHAR},#{updateOpr,jdbcType=INTEGER}, #{updateTime,jdbcType=TIMESTAMP},#{status,jdbcType=CHAR})
+  </insert>
+	
+	<!--更新功能信息 -->
+	<update id="update" parameterType="me.jeekhan.leyi.model.FuncInfo">
+	update tb_func_info
+	<set>
+		<if test="url != null">
+		url = #{url,jdbcType=VARCHAR},
+		</if>
+		<if test="name != null">
+		name = #{name,jdbcType=VARCHAR},
+		</if>
+		<if test="desc != null">
+		desc = #{desc,jdbcType=VARCHAR}
+		</if>
+		<if test="updateOpr != null">
+		update_opr = #{updateOpr,jdbcType=INTEGER},
+		</if>
+		<if test="updateTime != null">
+		update_time = #{updateTime,jdbcType=TIMESTAMP},
+		</if>
+		<if test="status != null">
+		status = #{status,jdbcType=CHAR},
+		</if>
+	</set>
+	where id = #{id,jdbcType=INTEGER}
+	</update>
+	
+	<!--逻辑删除功能信息 -->
+	<update id="delete" parameterType="int" > 
+    update tb_func_info
+    set status = 'D'
+    where id = #{id,jdbcType=INTEGER}
+	</update>
+  
+	<select id="selectAllFuncs" resultMap="BaseResultMap">
+	select t.*
+	 from tb_func_info t 
+	 where t.status='A'
+	</select>
+	
+	
+	<select id="selectFuncAndRoles" parameterType="int" resultMap="BaseResultMap">
+	select f.id,f.name,f.url,f.desc,f.update_time,f.update_opr,f.status,
+		fr.role_id,r.name role_name,r.desc role_desc,r.status role_status
+	from tb_func_info f
+	join tb_func_role fr on f.id = fr.func_id
+	join tb_role_info r on fr.role_id = r.id
+	where f.id = #{funcId}
+	
+	</select>
+	
+</mapper>

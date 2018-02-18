@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="me.jeekhan.leyi.dao.RoleInfoMapper" >
+  <resultMap id="BaseResultMap" type="me.jeekhan.leyi.model.RoleInfo" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="name" property="name" jdbcType="VARCHAR"/>
+     <result column="desc" property="desc" jdbcType="VARCHAR"/>
+    <result column="update_opr" property="updateOpr" jdbcType="INTEGER" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="status" property="status" jdbcType="CHAR" />
+  </resultMap>
+
+
+  <sql id="Base_Column_List" >
+    id, name,desc,update_opr, update_time, status
+  </sql>
+
+  <select id="selectByID" resultMap="BaseResultMap" parameterType="int" >
+    select t.*
+    from tb_role_info t
+    where t.id = #{id,jdbcType=INTEGER}
+    
+  </select>
+
+  <select id="selectByName" resultMap="BaseResultMap" parameterType="string" >
+    select t.*
+    from tb_role_info t
+    where t.name = #{name,jdbcType=VARCHAR} and t.status = 'A'
+  </select>
+  
+  <insert id="insert" parameterType="me.jeekhan.leyi.model.RoleInfo" keyProperty="id" useGeneratedKeys="true">
+    insert into tb_role_info (name,`desc`,update_opr, update_time, status)
+    values (#{name,jdbcType=VARCHAR},#{desc,jdbcType=VARCHAR},#{updateOpr,jdbcType=INTEGER}, #{updateTime,jdbcType=TIMESTAMP},#{status,jdbcType=CHAR})
+  </insert>
+	
+	<!--更新角色信息 -->
+	<update id="update" parameterType="me.jeekhan.leyi.model.RoleInfo">
+	update tb_role_info t
+	<set>
+		<if test="name != null">
+		t.name = #{name,jdbcType=VARCHAR},
+		</if>
+		<if test="desc != null">
+		t.desc = #{desc,jdbcType=VARCHAR},
+		</if>
+		<if test="updateOpr != null">
+		t.update_opr = #{updateOpr,jdbcType=INTEGER},
+		</if>
+		<if test="updateTime != null">
+		t.update_time = #{updateTime,jdbcType=TIMESTAMP},
+		</if>
+		<if test="status != null">
+		t.status = #{status,jdbcType=CHAR},
+		</if>
+	</set>
+	where t.id = #{id,jdbcType=INTEGER}
+	</update>
+	
+	<!--逻辑删除角色信息 -->
+    <update id="delete" parameterType="int" > 
+	    update tb_role_info t
+	    set t.status = 'D'
+	    where t.id = #{id,jdbcType=INTEGER}
+	</update>
+	
+	<select id="selectAllRoles" resultMap="BaseResultMap">
+	select * from tb_role_info t 
+	where t.status = 'A'
+	order by t.update_time desc
+	</select>
+  
+</mapper>
