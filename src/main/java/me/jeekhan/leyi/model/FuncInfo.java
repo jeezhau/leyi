@@ -8,14 +8,14 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 public class FuncInfo {
-	private int id;
+	private Integer id;
 	
 	@NotNull(message="功能名称：不可为空")
 	@Size(min=3,max=30,message="功能名称：长度为3-30字符")
 	private String name;
 	
-	@NotNull(message="功能名称：不可为空")
-	@Size(min=3,max=100,message="功能名称：长度为3-100字符")
+	@NotNull(message="功能URL：不可为空")
+	@Size(min=3,max=100,message="功能URL：长度为3-100字符")
 	private String url;
 	
 	@Size(max=600,message="功能描述：最长600字符")
@@ -30,11 +30,11 @@ public class FuncInfo {
 	
 	private List<RoleInfo> roles;
 
-	public int getId() {
+	public Integer getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(Integer id) {
 		this.id = id;
 	}
 	
@@ -92,6 +92,23 @@ public class FuncInfo {
 	public void setRoles(List<RoleInfo> roles) {
 		this.roles = roles;
 	}
+	@Override
+	public int hashCode() {
+		return id.hashCode();
+	}
 	
+	@Override
+	public boolean equals(Object other) {
+		if(other == null) {
+			return false;
+		}
+		if(!(other instanceof FuncInfo)) {
+			return false;
+		}
+		if(this.id == ((FuncInfo)other).getId()) {
+			return true;
+		}
+		return false;
+	}
 
 }

@@ -11,8 +11,8 @@ public interface FuncRoleMapper {
 	FuncRole selectByFuncRole(@Param("funcId")Integer funcId,@Param("roleId")Integer roleId);
 	//新增功能角色
 	int insert(FuncRole funcRole);
-	//逻辑删除功能角色
-	int delete(Integer funcRole);
+	//删除功能角色
+	int delete(Integer id);
 	//更新功能角色
 	int update(FuncRole funcRole);
 

@@ -10,7 +10,7 @@
     <result column="status" property="status" jdbcType="CHAR" />
     <association property="func" column="func_id" javaType="me.jeekhan.leyi.model.FuncInfo" >
 		<id property="id" column="func_id"/>
-		<result property="name" column="name"/>
+		<result property="name" column="func_name"/>
 		<result property="url" column="func_url"/> 
 		<result property="desc" column="func_desc"/> 
 		<result property="status" column="func_status"/> 
@@ -26,8 +26,8 @@
 
   <sql id="Base_Column_List" >
     fr.id, fr.func_id,fr.role_id,fr.update_opr, fr.update_time, fr.status,
-    fi.func_url,fi.func_desc,fi.func_status,
-    ri.role_name,ri.role_desc,ri.role_status
+    fi.url func_url,fi.name func_name,fi.desc func_desc,fi.status func_status,
+    ri.name role_name,ri.desc role_desc,ri.status role_status
   </sql>
 
   <select id="selectByID" resultMap="BaseResultMap" parameterType="int" >
@@ -62,7 +62,7 @@
 		func_id = #{funcId,jdbcType=INTEGER},
 		</if>
 		<if test="roleId != null">
-		role_id = #{roleId,jdbcType=INTEGER}
+		role_id = #{roleId,jdbcType=INTEGER},
 		</if>
 		<if test="updateOpr != null">
 		update_opr = #{updateOpr,jdbcType=INTEGER},
@@ -77,12 +77,11 @@
 	where id = #{id,jdbcType=INTEGER}
 	</update>
 	
-	<!--逻辑删除功能角色信息 -->
-    <update id="delete" parameterType="int" > 
-    update tb_func_role
-    set status = 'D'
+	<!--删除功能角色信息 -->
+    <delete id="delete" parameterType="int" > 
+    delete from tb_func_role
     where id = #{id,jdbcType=INTEGER}
-  </update>
+  </delete>
   
 </mapper>
 

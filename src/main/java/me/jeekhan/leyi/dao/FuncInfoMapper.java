@@ -21,7 +21,7 @@ public interface FuncInfoMapper {
 	//更新功能信息
 	int update(FuncInfo funcInfo);
 	
-	//逻辑删除功能
+	//删除功能
 	int delete(int funcInfo);
 	
 	List<FuncInfo> selectAllFuncs();

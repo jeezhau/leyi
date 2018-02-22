@@ -1,0 +1,13 @@
+
+button.valid{
+    position: relative;
+    top: -10px;
+    right: -21px;
+    color: inherit;
+	float:right;
+	padding: 0;
+	cursor: pointer;
+	background: 0 0;
+	border: 0;
+	font-size:24px;
+}

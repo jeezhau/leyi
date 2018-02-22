@@ -1,7 +1,9 @@
 package me.jeekhan.leyi.service.impl;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -69,7 +71,6 @@ public class RoleServiceImpl implements RoleService{
 		if(old != null && role.getId() != old.getId()) {
 			return ErrorCodes.ROLE_EXISTS_SAME_ROLE;
 		}
-		role.setStatus("A");
 		role.setUpdateTime(new Date());
 		int cnt = roleInfoMapper.update(role);
 		if(cnt<1) {
@@ -95,10 +96,23 @@ public class RoleServiceImpl implements RoleService{
 		if(old != null) {
 			return ErrorCodes.ROLE_EXISTS_SAME_FUNC;
 		}
+		func.setStatus("A");
 		func.setUpdateTime(new Date());
 		int cnt = funcInfoMapper.insert(func);
 		if(cnt < 1) {
 			return ErrorCodes.DB_CRUD_ERR;
+		}
+		//保存功能角色
+		if(func.getRoles() != null && !func.getRoles().isEmpty()) {
+			for(RoleInfo role:func.getRoles()) {
+				FuncRole funcRole = new FuncRole();
+				funcRole.setFuncId(func.getId());
+				funcRole.setRoleId(role.getId());
+				funcRole.setUpdateOpr(func.getUpdateOpr());
+				funcRole.setUpdateTime(new Date());
+				funcRole.setStatus("A");
+				this.addFuncRole(funcRole);
+			}
 		}
 		return new Long(func.getId());	//返回功能ID
 	}
@@ -114,6 +128,36 @@ public class RoleServiceImpl implements RoleService{
 
 	@Override
 	public Long updateFunc(FuncInfo func) {
+		FuncInfo old = funcInfoMapper.selectByURL(func.getUrl());
+		if(old != null && old.getId() != func.getId()) {
+			return ErrorCodes.ROLE_EXISTS_SAME_FUNC;
+		}
+		old = funcInfoMapper.selectFuncAndRoles(func.getId());
+		//保存功能角色
+		if(func.getRoles() != null && !func.getRoles().isEmpty()) {
+			Set<RoleInfo> newRoles = new HashSet<RoleInfo>(func.getRoles());//新提交的角色
+			Set<RoleInfo> oldRoles = new HashSet<RoleInfo>(old.getRoles()); //原来的角色
+			Set<RoleInfo> addRoles = new HashSet<RoleInfo>(newRoles);
+			addRoles.removeAll(oldRoles);
+			Set<RoleInfo> delRoles = new HashSet<RoleInfo>(oldRoles);
+			delRoles.removeAll(newRoles);
+			for(RoleInfo role:addRoles) {//新增功能角色
+				FuncRole funcRole = new FuncRole();
+				funcRole.setFuncId(func.getId());
+				funcRole.setRoleId(role.getId());
+				funcRole.setUpdateOpr(func.getUpdateOpr());
+				funcRole.setUpdateTime(new Date());
+				funcRole.setStatus("A");
+				this.addFuncRole(funcRole);
+			}
+			for(RoleInfo role:delRoles) {//删除功能角色
+				FuncRole funcRole = this.getFuncRole(func.getId(), role.getId());
+				funcRole.setUpdateOpr(func.getUpdateOpr());
+				funcRole.setUpdateTime(new Date());
+				funcRole.setStatus("D");
+				this.deleteFuncRole(funcRole);
+			}
+		}
 		func.setUpdateTime(new Date());
 		int cnt = funcInfoMapper.update(func);
 		if(cnt < 1) {

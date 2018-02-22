@@ -56,12 +56,11 @@
 	where t.id = #{id,jdbcType=INTEGER}
 	</update>
 	
-	<!--逻辑删除角色信息 -->
-    <update id="delete" parameterType="int" > 
-	    update tb_role_info t
-	    set t.status = 'D'
-	    where t.id = #{id,jdbcType=INTEGER}
-	</update>
+	<!--删除角色信息 -->
+    <delete id="delete" parameterType="int" > 
+	delete from tb_role_info t
+	where t.id = #{id,jdbcType=INTEGER}
+	</delete>
 	
 	<select id="selectAllRoles" resultMap="BaseResultMap">
 	select * from tb_role_info t 

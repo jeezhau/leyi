@@ -72,6 +72,23 @@ public class RoleInfo {
 		this.status = status;
 	}
 	
+	@Override
+	public int hashCode() {
+		return id.hashCode();
+	}
 	
+	@Override
+	public boolean equals(Object other) {
+		if(other == null) {
+			return false;
+		}
+		if(!(other instanceof RoleInfo)) {
+			return false;
+		}
+		if(this.id == ((RoleInfo)other).getId()) {
+			return true;
+		}
+		return false;
+	}
 
 }

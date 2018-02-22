@@ -21,8 +21,8 @@ public interface RoleInfoMapper {
 	//更新角色信息
 	int update(RoleInfo roleInfo);
 	
-	//逻辑删除角色
-	int delete(int roleInfo);
+	//删除角色
+	int delete(int roleId);
 	
 	//获取系统中所有的角色信息
 	List<RoleInfo> selectAllRoles();
