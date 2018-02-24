@@ -4,7 +4,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +29,7 @@ import me.jeekhan.leyi.common.ErrorCodesPropUtil;
 import me.jeekhan.leyi.common.SysPropUtil;
 import me.jeekhan.leyi.dto.Operator;
 import me.jeekhan.leyi.model.UserFullInfo;
+import me.jeekhan.leyi.service.RoleService;
 import me.jeekhan.leyi.service.UserService;
 
 /**
@@ -38,6 +42,8 @@ import me.jeekhan.leyi.service.UserService;
 public class LoginAction {
 	@Autowired
 	private UserService userService;
+	@Autowired
+	private RoleService roleService;
 
 	/**
 	 * 用户登录
@@ -51,20 +57,20 @@ public class LoginAction {
 	 * @param password	密码
 	 * @param map
 	 * @return	目标页面
+	 * @throws UnsupportedEncodingException 
 	 */
 	@RequestMapping(value="/login")
-	public String login(String username,String password,Map<String,Object>map,HttpServletRequest request){
+	public String login(String username,String password,Map<String,Object>map,HttpServletRequest request) throws UnsupportedEncodingException{
 		if(userService.authentification(username, password)){	//用户验证成功
 			UserFullInfo userInfo = userService.getUserFullInfo(username);
 			Operator operator = new Operator();
-			//operator.setLevel(9);	设置用户级别
 			operator.setUserId(userInfo.getId());
 			operator.setUsername(username);
+			operator.setUserRoles(roleService.getRoles4User(userInfo.getId()));
 			map.put("operator", operator);
-			map.put("userInfo", userInfo);
 			return "redirect:/" + username;
 		}else{
-			return "forward:/login.jsp";	//转发至登录页面
+			return "redirect:/login.jsp" + "?error=" + URLEncoder.encode("用户名密码不正确！","utf8");	//转发至登录页面
 		}
 	}
 	
@@ -109,21 +115,23 @@ public class LoginAction {
 	public String createUser(@Valid UserFullInfo userInfo,BindingResult result,@RequestParam(value="picFile",required=false)MultipartFile file,
 			Map<String,Object>map,HttpServletRequest request) throws NoSuchAlgorithmException, IOException{
 		//用户信息验证结果处理
-		map.put("userInfo", userInfo);
+		//map.put("userInfo", userInfo);
+		Map<String,String> valid = new HashMap<String,String>();//验证结果
+		map.put("valid", valid);
 		if(result.hasErrors()){	//
 			List<ObjectError> list = result.getAllErrors();
 			for(ObjectError e :list){
 				String filed = e.getCodes()[0].substring(e.getCodes()[0].lastIndexOf('.')+1);
-				map.put("valid." + filed, e.getDefaultMessage());
+				valid.put(filed, e.getDefaultMessage());
 			}
-			return "register";	//返回注册页面
+			return "forward:/register.jsp";	//返回注册页面
 		}
 		
 		//邀请码验证
 		boolean b = userService.isAvailableCode(userInfo.getInviteCode());
 		if(!b){
-			map.put("valid.inviteCode", "邀请码不正确（不存在、已超过使用期、超过可使用次数）！");
-			return "register";
+			valid.put("inviteCode", "邀请码不正确（不存在／已超过使用期／超过可使用次数）！");
+			return "forward:/register.jsp";	//返回注册页面
 		}
 		//头像文件重命名
 		String fileName = null;
@@ -159,10 +167,10 @@ public class LoginAction {
 		}
 		//更新登录操作员信息
 		Operator operator = new Operator();
-		operator.setLevel(new Integer(SysPropUtil.getParam("USER_INIT_LVL")));	//设置用户初始级别
+		operator.setUserRoles(null);
 		operator.setUserId(id);
 		operator.setUsername(userInfo.getUsername());
-		map.put("operator", operator);
+		map.put("operator", operator);//登录
 		
 		return "redirect:/" + userInfo.getUsername();
 	}

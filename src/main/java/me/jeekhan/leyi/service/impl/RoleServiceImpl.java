@@ -1,22 +1,28 @@
 package me.jeekhan.leyi.service.impl;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import me.jeekhan.leyi.common.ErrorCodes;
+import me.jeekhan.leyi.common.SysPropUtil;
 import me.jeekhan.leyi.dao.FuncInfoMapper;
 import me.jeekhan.leyi.dao.FuncRoleMapper;
 import me.jeekhan.leyi.dao.RoleInfoMapper;
 import me.jeekhan.leyi.dao.UserRoleMapper;
 import me.jeekhan.leyi.model.FuncInfo;
 import me.jeekhan.leyi.model.FuncRole;
+import me.jeekhan.leyi.model.ReviewApply;
 import me.jeekhan.leyi.model.RoleInfo;
+import me.jeekhan.leyi.model.UserFullInfo;
 import me.jeekhan.leyi.model.UserRole;
+import me.jeekhan.leyi.service.ReviewCheck;
 import me.jeekhan.leyi.service.RoleService;
 
 @Service
@@ -29,7 +35,9 @@ public class RoleServiceImpl implements RoleService{
 	private UserRoleMapper userRoleMapper;
 	@Autowired
 	private FuncRoleMapper funcRoleMapper;
-	
+	@Autowired
+	private ReviewCheck reviewCheck;
+
 	//角色信息基本操作：CRUD
 	@Override
 	public RoleInfo getRoleByID(Integer id) {
@@ -275,4 +283,82 @@ public class RoleServiceImpl implements RoleService{
 		return funcInfoMapper.selectFuncAndRoles(funcId);
 	}
 	
+	/**
+	 * 获取用户拥有的角色信息
+	 * 
+	 */
+	public List<UserRole> getRoles4User(Long userId){
+		return userRoleMapper.selectRoles4User(userId);
+	}
+	
+	/**
+	 * 保存用户角色申请
+	 * 1、每类申请在连续6次审批被拒绝后系统不再接受申请；
+	 * 2、待审批(包含复核中)、正常、拒绝的对象用户可修改再申请，如果复核中的对象被修改，则复核终止，重新进入审批流程。复核不通过的记录不可再次提交申请。
+	 * 3、用户提交申请后在，系统在“申请审批表”中记录一条申请信息。一条记录作为一次审批流程。
+	 * @param user	用户详细信息
+	 * @param userRoles	申请的角色信息
+	 * @return	{userRoleId:result}
+	 */
+	@Override 
+	public Map<RoleInfo,Long> applyUserRole(UserFullInfo user,List<RoleInfo> userRoles){		
+		Map<RoleInfo,Long> retMap = new HashMap<RoleInfo,Long>();
+		String objName = SysPropUtil.getParam("USER_ROLE");
+		for(RoleInfo role:userRoles) {
+			UserRole userRole = this.getUserRole(user.getId(), role.getId());
+			if(userRole == null) {//新增
+				userRole = new UserRole();
+				userRole.setRoleId(role.getId());
+				userRole.setUserId(user.getId());
+				userRole.setUpdateTime(new Date());
+				userRole.setStatus("0");
+				this.addUserRole(userRole);
+				//添加申请
+				ReviewApply apply = new ReviewApply();
+				apply = new ReviewApply();
+				apply.setObjName(objName);
+				apply.setKeyId(userRole.getId());
+				apply.setApplyTime(new Date());
+				apply.setStatus("0"); //待审核
+				reviewCheck.addReviewApply(apply);
+				retMap.put(role, 1L);
+			}else {
+				boolean can = reviewCheck.canApply(objName, userRole.getId());
+				if(!can) {//提交限制
+					retMap.put(role, ErrorCodes.REVIEW_APPLY_LIMIT);
+					continue;
+				}
+				ReviewApply apply = reviewCheck.getWait4Review(objName, userRole.getId());//取已有待审批记录
+				if(apply != null) {
+					if("CC".equals(apply.getStatus())) {//复核中
+						apply.setStatus("CT");//复核终止
+						apply = new ReviewApply();//重新申请
+						apply = new ReviewApply();
+						apply.setObjName(objName);
+						apply.setKeyId(userRole.getId());
+						apply.setApplyTime(new Date());
+						apply.setStatus("0"); //待审核
+						reviewCheck.addReviewApply(apply);
+					}else {
+						apply.setApplyTime(new Date());
+						reviewCheck.updateReviewApply(apply);
+					}
+				}else {
+					apply = new ReviewApply();//添加申请
+					apply = new ReviewApply();
+					apply.setObjName(objName);
+					apply.setKeyId(userRole.getId());
+					apply.setApplyTime(new Date());
+					apply.setStatus("0"); //待审核
+					reviewCheck.addReviewApply(apply);
+				}
+				//更新已有用户角色
+				userRole.setUpdateTime(new Date());
+				userRole.setStatus("0");
+				this.updateUserRole(userRole);
+				retMap.put(role, 1L);
+			}
+		}
+		return retMap;
+	}
 }

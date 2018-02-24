@@ -102,9 +102,9 @@ public class ArticleMgrAction {
 		//审核模式权限验证
 		if("review".equals(mode)){
 			Operator operator = (Operator) map.get("operator");
-			if(operator == null || operator.getLevel() < 9){//非管理员或未登录
+			//if(operator == null || operator.getLevel() < 9){//非管理员或未登录
 				return REDIRECT_SYS_ERROR_PAGE + "?error=" + URLEncoder.encode("权限错误：您无权执行该操作！","utf-8");	//跳转到个人首页
-			}
+			//}
 		}
 		//编辑模式验证
 		if("edit".equals(mode)) {
@@ -281,9 +281,9 @@ public class ArticleMgrAction {
 		if(targetUser == null) {//用户不存在
 			return REDIRECT_SYS_ERROR_PAGE + "?error=" + URLEncoder.encode("操作错误：用户【"+ username +"】不存在！","utf-8");	//跳转至系统错误页面
 		}
-		if(operator == null || operator.getLevel() < 9){ //无权限
-			return REDIRECT_SYS_ERROR_PAGE + "?error=" + URLEncoder.encode("权限错误：您未登录或无权限执行该操作！","utf-8");
-		}
+//		if(operator == null){ //无权限
+//			return REDIRECT_SYS_ERROR_PAGE + "?error=" + URLEncoder.encode("权限错误：您未登录或无权限执行该操作！","utf-8");
+//		}
 		//审批信息验证结果处理
 		if(result.hasErrors()){	//
 			List<ObjectError> list = result.getAllErrors();
@@ -307,7 +307,7 @@ public class ArticleMgrAction {
 			return REDIRECT_SYS_ERROR_PAGE + "?error=" + URLEncoder.encode("操作错误：该文章未处于待审核状态！","utf-8");
 		}
 		//审批申请检查
-		ReviewApply  reviewApply = reviewCheck.geReviewApplytByID(reviewLog.getApplyId());
+		ReviewApply  reviewApply = reviewCheck.getReviewApply(reviewLog.getApplyId());
 		if(reviewApply == null || !"0".equals(reviewApply.getStatus())) {
 			return REDIRECT_SYS_ERROR_PAGE + "?error=" + URLEncoder.encode("操作错误：系统中无指定的待审核用户！","utf-8");
 		}

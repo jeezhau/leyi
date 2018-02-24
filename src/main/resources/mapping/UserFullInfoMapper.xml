@@ -13,7 +13,7 @@
     <result column="profession" property="profession" jdbcType="VARCHAR" />
     <result column="introduce" property="introduce" jdbcType="VARCHAR" />
     <result column="picture" property="picture" jdbcType="VARCHAR" />
-    <result column="invite_code" property="inviteCode" jdbcType="VARCHAR"/>
+    <result column="invite_code" property="inviteCode" jdbcType="INTEGER"/>
     <result column="regist_time" property="registTime" jdbcType="TIMESTAMP" />
     <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
     <result column="status" property="status" jdbcType="CHAR" />
@@ -57,7 +57,7 @@
       #{birthday,jdbcType=DATE}, #{sex,jdbcType=CHAR}, #{passwd,jdbcType=VARCHAR}, #{city,jdbcType=VARCHAR}, 
       #{favourite,jdbcType=VARCHAR}, #{profession,jdbcType=VARCHAR}, #{introduce,jdbcType=VARCHAR}, 
       #{registTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}, #{status,jdbcType=CHAR}, 
-      #{picture,jdbcType=VARCHAR},#{inviteCode.jdbcType=VARCHAR})
+      #{picture,jdbcType=VARCHAR},#{inviteCode,jdbcType=INTEGER})
   </insert>
   
   <update id="updateByPrimaryKey" parameterType="me.jeekhan.leyi.model.UserFullInfo" >
@@ -74,9 +74,6 @@
       </if>
       <if test="sex != null" >
         sex = #{sex,jdbcType=CHAR},
-      </if>
-      <if test="passwd != null" >
-        passwd = #{passwd,jdbcType=VARCHAR},
       </if>
       <if test="city != null" >
         city = #{city,jdbcType=VARCHAR},
@@ -98,6 +95,13 @@
       </if>    
     </set>
     where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  <!-- 更新密码 -->
+  <update id="updatePwd" parameterType="map">
+  update tb_user_full_info
+  set passwd = #{newPwd,jdbcType=VARCHAR}
+  where id = #{userId,jdbcType=INTEGER}
   </update>
   
   <!--获取系统当前推荐可用显示于主页的用户信息 -->

@@ -33,6 +33,7 @@ public class ErrorCodes {
 	public static Long ROLE_EXISTS_SAME_ROLE = -103001L;	//已存在同名的角色
 	public static Long ROLE_EXISTS_SAME_FUNC = -103002L;	//已存在同URL的功能
 	
-	
+	//申请审核相关错误码，功能码：104
+	public static Long REVIEW_APPLY_LIMIT = -104001L;	//已达到提交申请限制(连续6次审批被拒绝或复核不通过)
 	
 }

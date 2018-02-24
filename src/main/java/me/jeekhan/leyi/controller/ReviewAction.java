@@ -31,11 +31,11 @@ public class ReviewAction {
 	@RequestMapping(value="/review",method=RequestMethod.GET)
 	public String review(@ModelAttribute("operator")Operator operator,Map<String,Object> map){
 		//权限控制
-		if(operator.getUserId()>0 && operator.getLevel() >= 9){
+		//if(operator.getUserId()>0 && operator.getLevel() >= 9){
 			return "reviewMgr";
-		}else{
-			return "redirect:/";	//跳转至系统主页
-		}
+//		}else{
+//			return "redirect:/";	//跳转至系统主页
+//		}
 	}
 
 }

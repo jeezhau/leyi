@@ -24,14 +24,17 @@ public class UserFullInfo {
     @Size(min=3,max=50,message="长度为3-50个字符！")	
     private String username;
     
+    @NotNull
     @Size(max=100,message="最长100个字符！")
     @Email
     //@Pattern(regexp="^[a-z0-9]+([._\\-]*[a-z0-9])*@([a-z0-9]+[-a-z0-9]*[a-z0-9]+.){1,63}[a-z0-9]+$")
     private String email;
     
+    @NotNull(message="不可为空！")
     @Pattern(regexp="\\d{4}-\\d{2}-\\d{2}",message="格式为：yyyy-MM-dd")
     private String birthday;
     
+    @NotNull(message="不可为空！")
     @Pattern(regexp="^[NFM]$",message="值只可为【M-男，F-女，N-保密】！")
     private String sex;
     
@@ -48,6 +51,7 @@ public class UserFullInfo {
     @Size(max=100,message="最长为100个字符！")
     private String profession;
     
+    @NotNull(message="不可为空！")
     @Size(max=600,message="最长为600个字符！")
     private String introduce;
     

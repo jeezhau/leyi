@@ -13,16 +13,15 @@
   <title>欢迎-注册</title>
   <meta name="description" content="">
   <meta name="author" content="jeekhan">
-  <link rel="shortcut icon" href="${contextPath}/images${contextPath}.ico" type="image/x-icon" />
-  <link rel="stylesheet" href="${contextPath}/bootstrap-3.3.5/css/bootstrap.min.css">  
-  <link rel="stylesheet" href="${contextPath}/bootstrap-3.3.5/css/fileinput.min.css">  
+  <link rel="shortcut icon" href="/leyi/images/leyi.ico" type="image/x-icon" />
+  <link rel="stylesheet" href="http://apps.bdimg.com/libs/bootstrap/3.3.0/css/bootstrap.min.css">  
   <script src="http://apps.bdimg.com/libs/jquery/2.1.1/jquery.min.js"></script>
-
+  <script src="http://apps.bdimg.com/libs/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+  
+  <link rel="stylesheet" href="${contextPath}/bootstrap-3.3.5/css/fileinput.min.css">  
   <script src="${contextPath}/bootstrap-3.3.5/js/fileinput.min.js"></script>
   <script src="${contextPath}/bootstrap-3.3.5/js/zh.js"></script>
   
-  <script src="${contextPath}/bootstrap-3.3.5/js/bootstrap.min.js"></script>
-
   <script src="${contextPath}/ckeditor/ckeditor.js"></script>
 </head>
 <body>
@@ -37,8 +36,8 @@
 	    <label for="inviteCode" class="col-xs-2 control-label">邀请码<span style="color:red">*</span></label>
 	    <div class="col-xs-5">
 	      <input type="text" class="form-control" id="inviteCode" name="inviteCode" title="邀请码" value="${param.inviteCode}" required>
-	      <c:if test="${not empty inviteCode}">
-	      <div class="alert alert-warning alert-dismissable">${inviteCode}
+	      <c:if test="${not empty valid.inviteCode}">
+	      <div class="alert alert-warning alert-dismissable">${valid.inviteCode}
 	        <button type="button" class="close" data-dismiss="alert"  aria-hidden="true"> &times;</button>
 	      </div>
 	      </c:if>
@@ -49,8 +48,8 @@
 	    <div class="col-xs-5">
 	      <input type="hidden" name="inviteCode" >
 	      <input type="text" class="form-control" id="username" name="username" pattern="\w{3,20}" title="3-20个字符组成" maxLength=20 value="${param.username}" required placeholder="请输入用户名（3-50个字符）">
-	      <c:if test="${not empty username}">
-	      <div class="alert alert-warning alert-dismissable">${username}
+	      <c:if test="${not empty valid.username}">
+	      <div class="alert alert-warning alert-dismissable">${valid.username}
 	        <button type="button" class="close" data-dismiss="alert"  aria-hidden="true"> &times;</button>
 	      </div>
 	      </c:if>
@@ -60,8 +59,8 @@
 	    <label for=email class="col-xs-2 control-label">邮箱<span style="color:red">*</span></label>
 	    <div class="col-xs-5">
 	      <input class="form-control" type="email" id="email" name="email" value="${param.email}" required maxLength=100 placeholder="请输入邮箱（最长100个字符）">
-	      <c:if test="${not empty email}">
-	      <div class="alert alert-warning alert-dismissable">${email}
+	      <c:if test="${not empty valid.email}">
+	      <div class="alert alert-warning alert-dismissable">${valid.email}
 	        <button type="button" class="close" data-dismiss="alert"  aria-hidden="true"> &times;</button>
 	      </div>
 	      </c:if>
@@ -85,27 +84,27 @@
 	    </div>
 	  </div>	  	  
 	  <div class="form-group">
-        <label for="age" class="col-xs-2 control-label">生日</label>
+        <label for="age" class="col-xs-2 control-label">生日<span style="color:red">*</span></label>
         <div class="col-xs-3">
-          <input class="form-control" type="date" id="birthday" name="birthday" placeholder="请输入生日（2010-09-09）" value="${param.birthday }">
-          <c:if test="${not empty birthday}">
-	      <div class="alert alert-warning alert-dismissable">${birthday}
+          <input class="form-control" type="date" id="birthday" name="birthday" required placeholder="请输入生日（2010-09-09）" value="${param.birthday }">
+          <c:if test="${not empty valid.birthday}">
+	      <div class="alert alert-warning alert-dismissable">${valid.birthday}
 	        <button type="button" class="close" data-dismiss="alert"  aria-hidden="true"> &times;</button>
 	      </div>
 	      </c:if>
         </div>
       </div>
  	  <div class="form-group">
-        <label  for="sex" class="col-xs-2 control-label">性别</label>
+        <label  for="sex" class="col-xs-2 control-label">性别<span style="color:red">*</span></label>
         <div class="col-xs-3">
-          <select class="form-control" id="sex" name="sex" >
+          <select class="form-control" id="sex" name="sex" required>
            <option value="M">男</option>
            <option value="F">女</option>
            <option value="N">保密</option>
           </select>
         </div>
-         <c:if test="${not empty sex}">
-	      <div class="alert alert-warning alert-dismissable">${sex}
+         <c:if test="${not empty valid.sex}">
+	      <div class="alert alert-warning alert-dismissable">${valid.sex}
 	        <button type="button" class="close" data-dismiss="alert"  aria-hidden="true"> &times;</button>
 	      </div>
 	      </c:if>
@@ -115,8 +114,8 @@
         <div class="col-xs-3">
           <input class="form-control" id="city" name="city" maxLength=50 placeholder="请输入城市" value="${param.city }">
         </div>
-        <c:if test="${not empty city}">
-	      <div class="alert alert-warning alert-dismissable">${city}
+        <c:if test="${not empty valid.city}">
+	      <div class="alert alert-warning alert-dismissable">${valid.city}
 	        <button type="button" class="close" data-dismiss="alert"  aria-hidden="true"> &times;</button>
 	      </div>
 	      </c:if>
@@ -126,8 +125,8 @@
         <div class="col-xs-5">
           <input class="form-control" id="favourite" name="favourite"  maxLength=100  placeholder="请输入兴趣爱好" value="${param.favourite }">
         </div>
-        <c:if test="${not empty favourite}">
-	      <div class="alert alert-warning alert-dismissable">${favourite}
+        <c:if test="${not empty valid.favourite}">
+	      <div class="alert alert-warning alert-dismissable">${valid.favourite}
 	        <button type="button" class="close" data-dismiss="alert"  aria-hidden="true"> &times;</button>
 	      </div>
 	      </c:if>
@@ -137,8 +136,8 @@
         <div class="col-xs-5">
           <input class="form-control" id="profession" name="profession"  maxLength=100   placeholder="请输入职业" value="${param.profession }">
         </div>
-        <c:if test="${not empty profession}">
-	    <div class="alert alert-warning alert-dismissable">${profession}
+        <c:if test="${not empty valid.profession}">
+	    <div class="alert alert-warning alert-dismissable">${valid.profession}
 	       <button type="button" class="close" data-dismiss="alert"  aria-hidden="true"> &times;</button>
 	    </div>
 	    </c:if>
@@ -149,8 +148,8 @@
           <textarea class="form-control" id="introduce" name="introduce"  maxLength=600 rows=5 required >${param.introduce }</textarea>
         </div>
       </div>
-      <c:if test="${not empty introduce}">
-      <div class="alert alert-warning alert-dismissable">${introduce}
+      <c:if test="${not empty valid.introduce}">
+      <div class="alert alert-warning alert-dismissable">${valid.introduce}
         <button type="button" class="close" data-dismiss="alert"  aria-hidden="true"> &times;</button>
       </div>
       </c:if>

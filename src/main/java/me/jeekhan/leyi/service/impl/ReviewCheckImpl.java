@@ -1,8 +1,12 @@
 package me.jeekhan.leyi.service.impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import me.jeekhan.leyi.common.ErrorCodes;
+import me.jeekhan.leyi.common.SysPropUtil;
 import me.jeekhan.leyi.dao.CheckLogMapper;
 import me.jeekhan.leyi.dao.ReviewApplyMapper;
 import me.jeekhan.leyi.dao.ReviewLogMapper;
@@ -30,7 +34,7 @@ public class ReviewCheckImpl implements ReviewCheck{
 	 * @param record
 	 * @return 新插入记录ID
 	 */
-    public Long insertReviewApply(ReviewApply record) {
+    public Long addReviewApply(ReviewApply record) {
     		reviewApplyMapper.insert(record);
     		return record.getId();
     }
@@ -40,22 +44,21 @@ public class ReviewCheckImpl implements ReviewCheck{
      * @param id
      * @return
      */
-    public ReviewApply geReviewApplytByID(Long id) {
+    public ReviewApply getReviewApply(Long id) {
     		return reviewApplyMapper.selectByID(id);
     }
     
     /**
-     * 变更审批申请记录状态
-     * @param id
-     * @param status
+     * 更新审批申请记录
+     * @param apply
      * @return  新更新记录ID
      */
-    public Long updateStatus4ReviewApply(Long id,String status) {
-    		int cnt = reviewApplyMapper.updateStatus(id, status);
+    public Long updateReviewApply(ReviewApply apply) {
+    		int cnt = reviewApplyMapper.update(apply);
     		if(cnt >0) {
-    			return id;
+    			return apply.getId();
     		}
-    		return -1L;	//更新数据库失败
+    		return ErrorCodes.DB_CRUD_ERR;	//更新数据库失败
     }
     
     /**
@@ -63,7 +66,7 @@ public class ReviewCheckImpl implements ReviewCheck{
      * @param record
      * @return  新插入记录ID
      */
-    public Long insertReviewLog(ReviewLog record) {
+    public Long addReviewLog(ReviewLog record) {
     		reviewLogMapper.insert(record);
     		return record.getId();
     }
@@ -73,7 +76,7 @@ public class ReviewCheckImpl implements ReviewCheck{
      * @param id
      * @return
      */
-    public ReviewLog getReviewLogByID(Long id) {
+    public ReviewLog getReviewLog(Long id) {
     		return reviewLogMapper.selectByID(id);
     }
     
@@ -82,7 +85,7 @@ public class ReviewCheckImpl implements ReviewCheck{
      * @param record
      * @return  新插入记录ID
      */
-    public Long insertCheckLog(CheckLog record) {
+    public Long addCheckLog(CheckLog record) {
     		checkLogMapper.insert(record);
     		return record.getId();
     }
@@ -92,7 +95,51 @@ public class ReviewCheckImpl implements ReviewCheck{
      * @param id
      * @return
      */
-    public CheckLog getCheckLogByID(Long id) {
+    public CheckLog getCheckLog(Long id) {
     		return checkLogMapper.selectByID(id);
+    }
+    
+    /**
+     * 取指定对象的待审核(包含复核中)的申请记录
+     * @param objName
+     * @param keyId
+     * @return
+     */
+    public ReviewApply getWait4Review(String objName,Long keyId) {
+    		return reviewApplyMapper.selectWait4Review(objName, keyId);
+    }
+    
+    /**
+     * 判断对象是否可再次提交申请
+     * 1、每类申请在连续N次审批被拒绝后系统不再接受申请；
+     * 2、复核不通过的记录不可再次提交申请；
+     * @param objName
+     * @param keyId
+     * @return
+     */
+    public boolean canApply(String objName,Long keyId) {
+    		int limitSize = 6;
+    		try {
+    			limitSize = new Integer(SysPropUtil.getParam("APPLY_LIMIT_CNT"));
+    		}catch(Exception e) {
+    			limitSize = 6;
+    		}
+    		List<ReviewApply> list = reviewApplyMapper.selectAll4Obj(objName, keyId);
+    		if(list == null || list.isEmpty()) {
+    			return true;
+    		}
+    		if("CR".equals(list.get(0).getStatus())) { //复核不通过
+			return false; 
+		}
+    		if(list.size() < limitSize) {
+    			return true;
+    		}else {
+    			for(int i=0;i<limitSize;i++) {
+    				if("A".equals(list.get(0).getStatus())) {//出现通过
+    					return true;
+    				}
+    			}
+    			return false;//连续N次被拒绝
+    		}
     }
 }

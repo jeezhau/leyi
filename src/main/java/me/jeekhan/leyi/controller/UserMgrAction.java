@@ -8,9 +8,14 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.validation.Valid;
 
@@ -36,8 +41,10 @@ import me.jeekhan.leyi.dto.Operator;
 import me.jeekhan.leyi.model.InviteCode;
 import me.jeekhan.leyi.model.ReviewApply;
 import me.jeekhan.leyi.model.ReviewLog;
+import me.jeekhan.leyi.model.RoleInfo;
 import me.jeekhan.leyi.model.UserFullInfo;
 import me.jeekhan.leyi.service.ReviewCheck;
+import me.jeekhan.leyi.service.RoleService;
 import me.jeekhan.leyi.service.UserService;
 
 /**
@@ -59,6 +66,8 @@ public class UserMgrAction {
 	private UserService userService;
 	@Autowired
 	private ReviewCheck reviewCheck;
+	@Autowired
+	private RoleService roleService;
 	
 	private static String REDIRECT_SYS_ERROR_PAGE = "redirect:" + SysPropUtil.getParam("SYSTEM_ERROR_PAGE");	//跳转至错误页面
 	/**
@@ -93,9 +102,7 @@ public class UserMgrAction {
 		//审核模式权限验证
 		if("review".equals(mode)){
 			Operator operator = (Operator) map.get("operator");
-			if(operator == null || operator.getLevel() < 9){//非管理员或未登录
-				return REDIRECT_SYS_ERROR_PAGE + "?error=" + URLEncoder.encode("您无权执行该操作！","utf-8");	
-			}
+
 		}
 		//编辑模式验证
 		if("edit".equals(mode)) {
@@ -111,6 +118,7 @@ public class UserMgrAction {
 			InviteCode inviteCode = userService.getAvailableCodeByUser(targetUser.getId());
 			String code = (inviteCode == null) ? "" : inviteCode.getCode().toString();
 			map.put("availCode", code);//取用户的可用邀请码
+			map.put("allRoles", roleService.getAllRoles());
 			return "user/userEdit";	//返回用户编辑页面
 		}
 		return "user/userShow";		//返回用户信息显示页面
@@ -135,22 +143,19 @@ public class UserMgrAction {
 			@ModelAttribute("operator")Operator operator,Map<String,Object> map) throws UnsupportedEncodingException{
 		String forwardUrl = "forward:/"+operator.getUsername()+"/user_mgr/review/";	//转发至用户审核页面
 		
-		if(operator == null || operator.getLevel() < 9){ //无权限
-			return REDIRECT_SYS_ERROR_PAGE + "?error=" + URLEncoder.encode("权限错误：您无权限执行该操作！","utf-8");
-		}
-		
 		//用户检查
 		UserFullInfo user = userService.getUserFullInfo(username);
 		if(user == null){ //无该用户
 			return REDIRECT_SYS_ERROR_PAGE + "?error=" + URLEncoder.encode("操作错误：系统中无该用户信息！","utf-8");
 		}
-
+		Map<String,String> valid = new HashMap<String,String>();
+		map.put("valid", valid);
 		//审批信息验证结果处理
 		if(result.hasErrors()){	//
 			List<ObjectError> list = result.getAllErrors();
 			for(ObjectError e :list){
 				String filed = e.getCodes()[0].substring(e.getCodes()[0].lastIndexOf('.')+1);
-				map.put("valid." + filed, e.getDefaultMessage());
+				valid.put(filed, e.getDefaultMessage());
 			}			
 			return forwardUrl;	//返回审批页面
 		}
@@ -160,7 +165,7 @@ public class UserMgrAction {
 			return forwardUrl;
 		}
 		//审批申请检查
-		ReviewApply  reviewApply = reviewCheck.geReviewApplytByID(reviewLog.getApplyId());
+		ReviewApply  reviewApply = reviewCheck.getReviewApply(reviewLog.getApplyId());
 		if(reviewApply == null || !"0".equals(reviewApply.getStatus())) {
 			return REDIRECT_SYS_ERROR_PAGE + "?error=" + URLEncoder.encode("操作错误：系统中无指定的待审核用户！","utf-8");
 		}
@@ -199,12 +204,14 @@ public class UserMgrAction {
 		
 		map.put("targetUser", userInfo);
 		map.put("mode","editBasic");		//模式：编辑基本信息
+		Map<String,String> valid =  new HashMap<String,String>();
+		map.put("valid", valid);
 		//数据格式验证处理
 		if(result.hasErrors()){
 			List<ObjectError> list = result.getAllErrors();
 			for(ObjectError e :list){
 				String filed = e.getCodes()[0].substring(e.getCodes()[0].lastIndexOf('.')+1);
-				map.put("valid." + filed, e.getDefaultMessage());
+				valid.put(filed, e.getDefaultMessage());
 			}
 			userInfo.setPicture(oldInfo.getPicture());
 			map.put("mode","editBasic");
@@ -245,9 +252,8 @@ public class UserMgrAction {
 		if(operator == null || oldInfo == null || operator.getUserId() != oldInfo.getId()){ //无权限	
 			return REDIRECT_SYS_ERROR_PAGE + "?error=" + URLEncoder.encode("权限错误：您无权限执行该操作！","utf-8");
 		}
-		map.put("targetUser", oldInfo);
-		map.put("mode","editPwd");
-		//密码验证
+		map.put("mode","editPwd");		//模式：修改密码
+		//原密码验证
 		String oldPwd = SunSHAUtils.encodeSHA512Hex(old_passwd);		
 		if(!oldPwd.equals(oldInfo.getPasswd())){
 			map.put("error","原密码不正确！");
@@ -256,13 +262,14 @@ public class UserMgrAction {
 		//数据保存
 		String newPwd = SunSHAUtils.encodeSHA512Hex(new_passwd);
 		oldInfo.setPasswd(newPwd);
-		Long id = userService.saveUser(oldInfo);
+		Long id = userService.updPwd(oldInfo);
 		if(id <= 0){	//用户信息保存错误
 			String errMsg = ErrorCodesPropUtil.getParam(id.toString());
 			map.put("error", errMsg);
 			return "user/userEdit";
 		}
-		return "redirect:/"+operator.getUsername()+ "/user_mgr/detail";	//返回用户详情显示页面
+		map.put("error", "密码修改成功！");
+		return "user/userEdit";
 	}
 	
 	/**
@@ -317,14 +324,15 @@ public class UserMgrAction {
 			map.put("mode","editPic");	//模式：头像变更
 			return "user/userEdit";	//返回用户信息编辑页面
 		}
-		//删除旧的图像		
-		File[] files = dir.listFiles(new FileFilter(oldPicName));
-		if(files != null && files.length>0){
-			for(File file:files){
-				file.delete();
+		//删除旧的图像	
+		if(oldPicName != null && oldPicName.length()>0) {
+			File[] files = dir.listFiles(new FileFilter(oldPicName));
+			if(files != null && files.length>0){
+				for(File file:files){
+					file.delete();
+				}
 			}
 		}
-		
 		return "redirect:/"+operator.getUsername()+ "/user_mgr/detail";	//返回用户详情显示页面
 	}
 	
@@ -338,20 +346,97 @@ public class UserMgrAction {
 	@RequestMapping("/createAvailCode")
 	@ResponseBody
 	public Object createAvailCode(@PathVariable("username")String username, @ModelAttribute("operator")Operator operator) throws UnsupportedEncodingException{
-		UserFullInfo oldInfo = userService.getUserFullInfo(username);
-		if(operator == null || oldInfo == null || operator.getUserId() != oldInfo.getId()){ //无权限	
+		UserFullInfo user = userService.getUserFullInfo(username);
+		if(operator == null || user == null || operator.getUserId() != user.getId()){ //无权限	
 			return REDIRECT_SYS_ERROR_PAGE + "?error=" + URLEncoder.encode("权限错误：您无权限执行该操作！","utf-8");
 		}
-		Map<String,String> ret = new HashMap<String,String>();
-		InviteCode inviteCode = userService.getAvailableCodeByUser(oldInfo.getId());
+		Map<String,Object> retMap = new HashMap<String,Object>();
+		retMap.put("result", "failure");
+		if(!"A".equals(user.getStatus())) {
+			retMap.put("error", "仅待您的注册信息被审核通过后您才可执行该操作！");
+			return retMap;
+		}
+		InviteCode inviteCode = userService.getAvailableCodeByUser(user.getId());
 		BigDecimal code = null;
 		if(inviteCode == null) {
-			code = userService.createNewCode(oldInfo.getId());
+			code = userService.createNewCode(user.getId());
 		}else {
 			code = inviteCode.getCode();
 		}
-		ret.put("code", code.toString());
-		return ret;
+		retMap.put("result", "success");
+		retMap.put("code", code.toString());
+		return retMap;
+	}
+	
+	/**
+	 * 用户提交角色申请
+	 * @param rolesId
+	 * @param username
+	 * @param operator
+	 * @return
+	 * @throws UnsupportedEncodingException 
+	 */
+	@RequestMapping("/applyRole")
+	@ResponseBody
+	public Object applyRole(String rolesId,@PathVariable("username")String username, @ModelAttribute("operator")Operator operator) throws UnsupportedEncodingException {
+		UserFullInfo user = userService.getUserFullInfo(username);
+		if(operator == null || user == null || operator.getUserId() != user.getId()){ //无权限	
+			return REDIRECT_SYS_ERROR_PAGE + "?error=" + URLEncoder.encode("权限错误：您无权限执行该操作！","utf-8");
+		}
+		//角色检查
+		if(rolesId == null) {
+			rolesId = "";
+		}
+		String[] arrId = rolesId.split(",");
+		List<RoleInfo> userRoles = new ArrayList<RoleInfo>();
+		Set<String> setId = new HashSet<String>(Arrays.asList(arrId));//去重
+		Set<String> errId = new HashSet<String>();
+		for(String roleId:setId) {
+			roleId = roleId.trim();
+			try {
+				if(roleId.length()>0) {
+					RoleInfo role = roleService.getRoleByID(new Integer(roleId));
+					if(role == null) {
+						errId.add(roleId);
+					}else {
+						userRoles.add(role);
+					}
+				}
+			}catch(Exception e) {
+				errId.add(roleId);
+			}
+		}
+		Map<String,Object> retMap = new HashMap<String,Object>();
+		retMap.put("result", "failure");//操作结果：失败
+		if(!errId.isEmpty()) {
+			String errMsg = "角色" + errId.toString() + "不存在！";
+			retMap.put("error", errMsg);
+			return retMap;
+		}
+		if(userRoles.isEmpty()) {
+			String errMsg = "可添加角色为空！";
+			retMap.put("error", errMsg);
+			return retMap;
+		}
+		Map<RoleInfo,Long> applyRet = roleService.applyUserRole(user, userRoles);
+		String errMsg = "";
+		List<Integer> succList = new ArrayList<Integer>();
+		for(Entry<RoleInfo,Long> entry:applyRet.entrySet()) {
+			if(entry.getValue()<0) {
+				errMsg += entry.getKey().getName() +  ":" + entry.getValue();
+			}else {
+				succList.add(entry.getKey().getId());
+			}
+		}
+		retMap.put("succRoles", succList);
+		if(succList.size() == userRoles.size()) {//全部成功
+			retMap.put("result", "success");
+		}else {
+			retMap.put("error", errMsg);
+		}
+		//更新登录信息
+		operator.setUserRoles(roleService.getRoles4User(user.getId()));
+		return retMap;
 	}
 }
 

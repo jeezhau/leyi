@@ -26,10 +26,18 @@
     values (#{objName,jdbcType=VARCHAR}, #{keyId,jdbcType=INTEGER}, 
       #{applyTime,jdbcType=TIMESTAMP}, #{status,jdbcType=VARCHAR})
   </insert>
-  
-  <update id="updateStatus" parameterType="map">
-   update tb_review_apply
-   set status = #{status,jdbcType=VARCHAR}
+  <!-- 更新记录：状态(0：待审核，A：通过，R：不通过，CC：复核中，CR：复核不通过，CA：复核通过)，CT：复核终止) -->
+  <update id="update" parameterType="map">
+   update tb_review_apply t
+   <set>
+     <if test="status != null">
+     t.status = #{status,jdbcType=VARCHAR},
+     </if>
+     <if test="applyTime != null">
+     t.apply_time = #{applyTime,jdbcType=TIMESTAMP},
+     </if>
+   </set>
+   where t.id = #{id,jdbcType=INTEGER}
   </update>
   
   <!-- 取指定对象的待审核记录 -->
@@ -37,13 +45,16 @@
    select 
    <include refid="Base_Column_List" />
    from tb_review_apply
-   where obj_name = #{objName,jdbcType=VARCHAR} and key_id = #{keyId,jdbcType=INTEGER} and status = '0' 
+   where obj_name = #{objName,jdbcType=VARCHAR} and key_id = #{keyId,jdbcType=INTEGER} 
+   and status in ('0','CC')
   </select>
   
-  <update id="updateApplyTime" parameterType="date">
-   update tb_review_apply
-   set apply_time = #{applyTime,jdbcType=TIMESTAMP}
-   where id = #{id,jdbcType=INTEGER}
-  </update>
+    <!-- 取指定对象的所有审核记录 -->
+  <select id="selectAll4Obj" parameterType="map" resultMap="BaseResultMap">
+   select *
+   from tb_review_apply
+   where obj_name = #{objName,jdbcType=VARCHAR} and key_id = #{keyId,jdbcType=INTEGER} 
+   order by apply_time desc 
+  </select>
   
 </mapper>

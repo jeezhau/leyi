@@ -8,9 +8,8 @@
 	<div class="caption">
 		<p>&nbsp;&nbsp;&nbsp;&nbsp;
 			<c:if test="${not empty operator and targetUser.id == operator.userId}">
-			<a href="${contextPath}/${operator.username}/user_mgr/edit">编辑</a>&nbsp;&nbsp;&nbsp;&nbsp;
+			<a href="${contextPath}/${operator.username}/user_mgr/edit">个人中心</a>&nbsp;&nbsp;&nbsp;&nbsp;
 			</c:if>
-			<a href="${contextPath}/${operator.username}/user_mgr/detail">展示</a>
 		</p>
 		<hr/>
 		<div>&nbsp;&nbsp;&nbsp;&nbsp;${targetUser.introduce}</div><!-- 个人简介 -->

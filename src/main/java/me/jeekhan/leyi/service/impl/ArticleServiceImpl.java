@@ -11,14 +11,14 @@ import me.jeekhan.leyi.common.ErrorCodes;
 import me.jeekhan.leyi.common.PageCond;
 import me.jeekhan.leyi.dao.ArticleBriefMapper;
 import me.jeekhan.leyi.dao.ArticleDetailMapper;
-import me.jeekhan.leyi.dao.ReviewApplyMapper;
-import me.jeekhan.leyi.dao.ReviewLogMapper;
 import me.jeekhan.leyi.dao.ThemeClassMapper;
 import me.jeekhan.leyi.model.ArticleBrief;
 import me.jeekhan.leyi.model.ArticleDetail;
+import me.jeekhan.leyi.model.ReviewApply;
 import me.jeekhan.leyi.model.ReviewLog;
 import me.jeekhan.leyi.model.ThemeClass;
 import me.jeekhan.leyi.service.ArticleService;
+import me.jeekhan.leyi.service.ReviewCheck;
 
 /**
  * 文章相关服务
@@ -33,11 +33,9 @@ public class ArticleServiceImpl implements ArticleService {
 	@Autowired
 	private ArticleDetailMapper  articleDetailMapper;
 	@Autowired
-	private ReviewLogMapper reviewLogMapper;
-	@Autowired
 	private ThemeClassMapper themeClassMapper;
 	@Autowired
-	private ReviewApplyMapper reviewApplyMapper;
+	private ReviewCheck reviewCheck;
 	/**
 	 * 获取指定文章概要信息
 	 * @param articleId	文章ID
@@ -217,13 +215,15 @@ public class ArticleServiceImpl implements ArticleService {
 		String briefInfo = articleBriefMapper.selectByPrimaryKey(articleId).toString();
 		reviewLog.setOriginalInfo(briefInfo);
 		reviewLog.setReviewTime(new Date());
-		reviewLogMapper.insert(reviewLog);
+		reviewCheck.addReviewLog(reviewLog);
 		
 		String contentInfo = articleDetailMapper.selectByPrimaryKey(articleId).toString();
 		reviewLog.setOriginalInfo(contentInfo);
-		reviewLogMapper.insert(reviewLog);
+		reviewCheck.addReviewLog(reviewLog);
 		
-		reviewApplyMapper.updateStatus(reviewLog.getApplyId(), reviewLog.getStatus());
+		ReviewApply apply = reviewCheck.getReviewApply(reviewLog.getApplyId());
+		apply.setStatus(reviewLog.getStatus());
+		reviewCheck.updateReviewApply(apply);
 		return articleBriefMapper.updateStatus(articleId,reviewLog.getStatus());
 		
 	}

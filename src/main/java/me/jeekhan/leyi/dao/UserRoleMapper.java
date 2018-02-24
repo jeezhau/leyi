@@ -1,5 +1,7 @@
 package me.jeekhan.leyi.dao;
 
+import java.util.List;
+
 import org.apache.ibatis.annotations.Param;
 
 import me.jeekhan.leyi.model.UserRole;
@@ -15,5 +17,6 @@ public interface UserRoleMapper {
 	int delete(Long id);
 	//更新用户角色
 	int update(UserRole userRole);
-
+	//取用户拥有的所有角色信息
+	List<UserRole> selectRoles4User(Long userId);
 }

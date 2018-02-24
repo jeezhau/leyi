@@ -19,12 +19,9 @@ public class UserRole {
 	@NotNull
 	private int roleId;
 	
-	private Long updateOpr;
-	
 	private Date updateTime;
 	
-	@Pattern(regexp="^[AD]$")
-	private String status;	//状态
+	private String status;
 	
 	private UserFullInfo user;
 	
@@ -52,14 +49,6 @@ public class UserRole {
 
 	public void setRoleId(int roleId) {
 		this.roleId = roleId;
-	}
-
-	public Long getUpdateOpr() {
-		return updateOpr;
-	}
-
-	public void setUpdateOpr(Long updateOpr) {
-		this.updateOpr = updateOpr;
 	}
 
 	public Date getUpdateTime() {

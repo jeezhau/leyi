@@ -17,7 +17,10 @@ public interface UserFullInfoMapper {
     Long updateStatus(@Param("id")Long id,@Param("status") String status);
     
     //新插入用户记录
-    Long insert(UserFullInfo record);
+    int insert(UserFullInfo user);
+    
+    //更新密码
+    int updatePwd(@Param("userId")Long userId,@Param("newPwd")String newPwd);
     
     //根据主键获取用户详细信息
     UserFullInfo selectByPrimaryKey(Long id);

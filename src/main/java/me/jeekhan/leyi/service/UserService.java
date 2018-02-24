@@ -42,6 +42,13 @@ public interface UserService {
 	public Long saveUser(UserFullInfo userFullInfo) throws NoSuchAlgorithmException, UnsupportedEncodingException;
 	
 	/**
+	 * 更新用户密码
+	 * @param user
+	 * @return
+	 */
+	public Long updPwd(UserFullInfo user);
+	
+	/**
 	 * 获取用于显示于系统主页的用户信息
 	 * @return
 	 */

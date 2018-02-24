@@ -14,8 +14,6 @@ import me.jeekhan.leyi.common.PageCond;
 import me.jeekhan.leyi.common.SunSHAUtils;
 import me.jeekhan.leyi.common.SysPropUtil;
 import me.jeekhan.leyi.dao.InviteCodeMapper;
-import me.jeekhan.leyi.dao.ReviewApplyMapper;
-import me.jeekhan.leyi.dao.ReviewLogMapper;
 import me.jeekhan.leyi.dao.UserBaseInfoMapper;
 import me.jeekhan.leyi.dao.UserFullInfoMapper;
 import me.jeekhan.leyi.model.InviteCode;
@@ -23,6 +21,7 @@ import me.jeekhan.leyi.model.ReviewApply;
 import me.jeekhan.leyi.model.ReviewLog;
 import me.jeekhan.leyi.model.UserBaseInfo;
 import me.jeekhan.leyi.model.UserFullInfo;
+import me.jeekhan.leyi.service.ReviewCheck;
 import me.jeekhan.leyi.service.UserService;
 
 @Service
@@ -32,9 +31,7 @@ public class UserServiceImpl implements UserService{
 	@Autowired
 	private UserFullInfoMapper userFullInfoMapper;
 	@Autowired
-	private ReviewLogMapper reviewInfoMapper;
-	@Autowired
-	private ReviewApplyMapper reviewApplyMapper;
+	private ReviewCheck reviewCheck;
 	@Autowired
 	private InviteCodeMapper inviteCodeMapper;
 	
@@ -99,10 +96,7 @@ public class UserServiceImpl implements UserService{
 	 * @throws NoSuchAlgorithmException 
 	 */
 	@Override 
-	public Long saveUser(UserFullInfo userFullInfo) throws NoSuchAlgorithmException, UnsupportedEncodingException{
-		if(userFullInfo == null){
-			return ErrorCodes.LESS_INFO;
-		}		
+	public Long saveUser(UserFullInfo userFullInfo) throws NoSuchAlgorithmException, UnsupportedEncodingException{		
 		UserFullInfo oldInfo = userFullInfoMapper.selectByName(userFullInfo.getUsername());
 		if(oldInfo != null && !oldInfo.getId().equals(userFullInfo.getId())){
 			if(oldInfo.getUsername().equals(userFullInfo.getUsername())){	//用户名已被使用
@@ -112,6 +106,7 @@ public class UserServiceImpl implements UserService{
 				return ErrorCodes.USER_EMAIL_USED;
 			}
 		}
+		String objName = SysPropUtil.getParam("USER");
 		userFullInfo.setStatus("0");	//待审核
 		if(userFullInfo.getId() == null){//新增
 			userFullInfo.setPasswd(SunSHAUtils.encodeSHA512Hex(userFullInfo.getPasswd()));
@@ -121,31 +116,69 @@ public class UserServiceImpl implements UserService{
 			Long userId = userFullInfo.getId();	//取新增用户的ID
 			//修改邀请码的使用次数
 			inviteCodeMapper.updateUsedCnt(userFullInfo.getInviteCode());
-			//新插入或更新审批申请
-			String objName = SysPropUtil.getParam("USER");
-			ReviewApply apply = reviewApplyMapper.selectWait4Review(objName, userId);
+			//添加申请
+			ReviewApply apply = new ReviewApply();
+			apply = new ReviewApply();
+			apply.setObjName(objName);
+			apply.setKeyId(userId);
+			apply.setApplyTime(new Date());
+			apply.setStatus("0"); //待审核
+			reviewCheck.addReviewApply(apply);
+			return userId;
+		}else{	//修改
+			Long userId = userFullInfo.getId();	//取用户的ID
+			oldInfo = userFullInfoMapper.selectByPrimaryKey(userId);
+			if(oldInfo == null) {//用户不存在
+				return ErrorCodes.USER_NO_EXISTS;
+			}
+			
+			boolean can = reviewCheck.canApply(objName, userId);
+			if(!can) {//提交限制
+				return  ErrorCodes.REVIEW_APPLY_LIMIT;
+			}
+			ReviewApply apply = reviewCheck.getWait4Review(objName, userId);//取已有待审批记录
 			if(apply != null) {
-				reviewApplyMapper.updateApplyTime(apply.getId(),new Date());
+				if("CC".equals(apply.getStatus())) {//复核中
+					apply.setStatus("CT");//复核终止
+					apply = new ReviewApply();//重新申请
+					apply = new ReviewApply();
+					apply.setObjName(objName);
+					apply.setKeyId(userId);
+					apply.setApplyTime(new Date());
+					apply.setStatus("0"); //待审核
+					reviewCheck.addReviewApply(apply);
+				}else {
+					apply.setApplyTime(new Date());
+					reviewCheck.updateReviewApply(apply);
+				}
 			}else {
+				apply = new ReviewApply();//添加申请
 				apply = new ReviewApply();
 				apply.setObjName(objName);
 				apply.setKeyId(userId);
 				apply.setApplyTime(new Date());
 				apply.setStatus("0"); //待审核
-				reviewApplyMapper.insert(apply);
+				reviewCheck.addReviewApply(apply);
 			}
-			return userId;
-		}else{	//修改
-			oldInfo = userFullInfoMapper.selectByPrimaryKey(userFullInfo.getId());
-			if(oldInfo == null) {
-				return ErrorCodes.USER_NO_EXISTS;
-			}
+			//更新用户信息
 			userFullInfo.setRegistTime(oldInfo.getRegistTime());
 			userFullInfo.setUpdateTime(new Date());
+			userFullInfo.setStatus("0");
 			userFullInfoMapper.updateByPrimaryKey(userFullInfo);
 			return userFullInfo.getId();
 		}
 	}
+	
+	/**
+	 * 更新用户密码
+	 * @param user
+	 * @return
+	 */
+	public Long updPwd(UserFullInfo user) {
+		userFullInfoMapper.updatePwd(user.getId(),user.getPasswd());
+		return user.getId();
+	}
+	
 	
 	/**
 	 * 获取可用于显示于系统首页的用户
@@ -185,8 +218,11 @@ public class UserServiceImpl implements UserService{
 		String usrInfo = userFullInfoMapper.selectByPrimaryKey(userId).toString();
 		reviewLog.setOriginalInfo(usrInfo);
 		reviewLog.setReviewTime(new Date());
-		reviewInfoMapper.insert(reviewLog);
-		reviewApplyMapper.updateStatus(reviewLog.getApplyId(), reviewLog.getStatus());
+		reviewCheck.addReviewLog(reviewLog);
+		
+		ReviewApply apply = reviewCheck.getReviewApply(reviewLog.getApplyId());
+		apply.setStatus(reviewLog.getStatus());
+		reviewCheck.updateReviewApply(apply);
 		return userFullInfoMapper.updateStatus(userId, reviewLog.getStatus());
 	}
 	
